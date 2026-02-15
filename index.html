@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTC5M • Final Call Predictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        body { font-family: system-ui, sans-serif; }
+        .price-up { animation: pop 0.4s ease-out; }
+        @keyframes pop { 0% { transform: scale(1.08); } 100% { transform: scale(1); } }
+        .live-dot { animation: pulse 1.8s infinite; }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 min-h-screen">
+    <div class="max-w-6xl mx-auto p-6">
+
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl flex items-center justify-center text-4xl font-bold">₿</div>
+                <div>
+                    <h1 class="text-4xl font-bold tracking-tighter">BTC<span class="text-emerald-400">5M</span></h1>
+                    <p class="text-emerald-400 text-sm">Chainlink • Polymarket 5-min oracle</p>
+                </div>
+            </div>
+            <a href="https://polymarket.com/crypto/5M" target="_blank" 
+               class="bg-emerald-600 hover:bg-emerald-500 px-6 py-3 rounded-2xl font-semibold flex items-center gap-2">
+                <i class="fa-solid fa-external-link"></i> Polymarket 5M
+            </a>
+        </div>
+
+        <!-- LIVE + COUNTDOWN + MANUAL -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="col-span-2 bg-zinc-900 rounded-3xl p-8">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="flex items-center gap-3 text-emerald-400 mb-1">
+                            <span class="w-3 h-3 bg-emerald-400 rounded-full live-dot"></span>
+                            BTC/USD (Chainlink)
+                        </div>
+                        <div id="live-price" class="text-6xl md:text-7xl font-bold font-mono">$00,000</div>
+                        <div id="price-change" class="text-xl mt-2 flex items-center gap-2"></div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-zinc-500 uppercase">Next window closes in</div>
+                        <div id="countdown" class="font-mono text-5xl md:text-6xl font-bold text-orange-400">05:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-zinc-900 rounded-3xl p-6 flex flex-col justify-center">
+                <div class="text-sm text-zinc-400 mb-3">MY BET</div>
+                <div class="flex gap-3">
+                    <button onclick="manualBet('UP')"   class="flex-1 bg-emerald-700 hover:bg-emerald-600 py-5 rounded-2xl text-2xl font-bold">UP</button>
+                    <button onclick="manualBet('DOWN')" class="flex-1 bg-red-700   hover:bg-red-600   py-5 rounded-2xl text-2xl font-bold">DOWN</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOCKED CALL -->
+        <div class="bg-zinc-900 rounded-3xl p-8 mb-8">
+            <h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-lock"></i> LOCKED CALL – THIS WINDOW
+            </h2>
+            <div class="flex flex-col sm:flex-row items-start sm:items-end gap-6 sm:gap-12">
+                <div id="final-dir" class="text-8xl font-extrabold min-w-[140px] text-center">—</div>
+                <div>
+                    <div id="final-conf" class="text-4xl font-mono mb-2">— %</div>
+                    <div id="price-to-beat" class="text-lg font-mono text-zinc-300">Price to beat: —</div>
+                    <div id="window-start-info" class="text-sm text-zinc-500 mt-1"></div>
+                </div>
+            </div>
+            <div class="mt-6 text-xs text-zinc-500">
+                Call locked at window start (momentum-based).<br>
+                <span id="debug-momentum" class="text-amber-300"></span>
+            </div>
+        </div>
+
+        <!-- CHART + LOGS -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-900 rounded-3xl p-6">
+                <div class="font-semibold mb-4">Live Chart</div>
+                <div class="h-64"><canvas id="priceChart"></canvas></div>
+            </div>
+
+            <div class="bg-zinc-900 rounded-3xl p-6">
+                <h2 class="font-semibold mb-4">Final Call History</h2>
+                <div id="history" class="text-sm font-mono overflow-auto max-h-80"></div>
+            </div>
+        </div>
+
+        <div class="text-center text-zinc-600 text-xs mt-10">
+            Personal tracker • Chainlink feed • For research only
+        </div>
+    </div>
+
+    <script>
+        let ws, chart, lastPrice = null;
+        let priceHistory = [];
+        let currentWindowStart = null;         // {price, time}
+        let currentCall = null;                // {dir, conf, momentum}
+        let history = JSON.parse(localStorage.getItem('btc5m_calls_2026')) || [];
+        let manualBets = JSON.parse(localStorage.getItem('btc5m_bets')) || [];
+
+        function connect() {
+            ws = new WebSocket('wss://ws-live-data.polymarket.com');
+            ws.onopen = () => ws.send(JSON.stringify({
+                action: "subscribe",
+                subscriptions: [{ topic: "crypto_prices_chainlink", type: "*", filters: "{\"symbol\":\"btc/usd\"}" }]
+            }));
+            ws.onmessage = e => {
+                try {
+                    const msg = JSON.parse(e.data);
+                    if (msg.topic === "crypto_prices_chainlink" && msg.payload?.symbol === "btc/usd") {
+                        const p = parseFloat(msg.payload.value);
+                        updatePrice(p);
+                        priceHistory.push({t: Date.now(), p});
+                        if (priceHistory.length > 500) priceHistory.shift();
+                        processWindow(p);
+                        if (chart) updateChart();
+                    }
+                } catch {}
+            };
+            ws.onclose = () => setTimeout(connect, 4000);
+        }
+
+        function updatePrice(p) {
+            lastPrice = p;
+            document.getElementById('live-price').textContent = '$' + p.toLocaleString('en-US');
+            document.getElementById('live-price').classList.add('price-up');
+            setTimeout(() => document.getElementById('live-price').classList.remove('price-up'), 600);
+        }
+
+        function processWindow(currentPrice) {
+            const now = Date.now();
+            const date = new Date();
+            const sec5min = (date.getMinutes() % 5) * 60 + date.getSeconds();
+
+            // New window start
+            if (sec5min <= 4 && (!currentWindowStart || now - currentWindowStart.time > 295000)) {
+                currentWindowStart = { price: currentPrice, time: now };
+
+                // Momentum (shorter & looser thresholds)
+                const recent = priceHistory.slice(-12); // ≈40–80 seconds
+                let ups = 0;
+                for (let i = 1; i < recent.length; i++) {
+                    if (recent[i].p >= recent[i-1].p) ups++;
+                }
+                const momentum = recent.length > 1 ? ups / (recent.length - 1) : 0.5;
+
+                let dir = "NEUTRAL";
+                let conf = 51;
+                if (momentum >= 0.54) { dir = "UP";   conf = 53 + Math.floor(momentum * 8); }
+                if (momentum <= 0.46) { dir = "DOWN"; conf = 53 + Math.floor((1-momentum) * 8); }
+
+                currentCall = { dir, conf, momentum: momentum.toFixed(3) };
+
+                // Show
+                const dEl = document.getElementById('final-dir');
+                dEl.textContent = dir;
+                dEl.className = dir === "UP" ? "text-8xl font-extrabold text-emerald-400" :
+                                dir === "DOWN" ? "text-8xl font-extrabold text-red-400" :
+                                "text-8xl font-extrabold text-zinc-500";
+
+                document.getElementById('final-conf').textContent = conf + " %";
+                document.getElementById('price-to-beat').textContent = `Price to beat: $${currentPrice.toLocaleString('en-US')}`;
+                document.getElementById('window-start-info').textContent = `Window opened • ${new Date(now).toLocaleTimeString()}`;
+                document.getElementById('debug-momentum').textContent = `Momentum: ${currentCall.momentum} → ${dir}`;
+            }
+
+            // Window end → resolve
+            if (currentWindowStart && sec5min >= 297 && sec5min <= 302) {
+                const outcome = currentPrice >= currentWindowStart.price ? "UP" : "DOWN";
+                const win = currentCall && currentCall.dir === outcome ? "WIN ✓" : "LOSS ✗";
+
+                history.unshift({
+                    window: new Date(currentWindowStart.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+                    call: currentCall ? currentCall.dir : "—",
+                    conf: currentCall ? currentCall.conf + "%" : "—",
+                    start: currentWindowStart.price.toLocaleString('en-US'),
+                    result: outcome + " " + win
+                });
+
+                if (history.length > 60) history.pop();
+                localStorage.setItem('btc5m_calls_2026', JSON.stringify(history));
+                renderHistory();
+
+                currentCall = null;
+                currentWindowStart = null;
+            }
+        }
+
+        function renderHistory() {
+            let html = `<div class="grid grid-cols-5 gap-3 font-semibold text-zinc-400 pb-2 border-b border-zinc-700 sticky top-0 bg-zinc-900 z-10">
+                <div>Time</div><div>Call</div><div>Conf</div><div>Start</div><div>Result</div>
+            </div>`;
+            history.forEach(h => {
+                const color = h.result.includes("✓") ? "text-emerald-400" : "text-red-400";
+                html += `
+                    <div class="grid grid-cols-5 gap-3 py-2 border-b border-zinc-800 text-sm">
+                        <div>${h.window}</div>
+                        <div class="${h.call==='UP'?'text-emerald-400':h.call==='DOWN'?'text-red-400':''}">${h.call}</div>
+                        <div>${h.conf}</div>
+                        <div>${h.start}</div>
+                        <div class="${color} font-medium">${h.result}</div>
+                    </div>`;
+            });
+            document.getElementById('history').innerHTML = html || '<div class="text-zinc-500 py-6 text-center">No resolved calls yet</div>';
+        }
+
+        function manualBet(dir) {
+            if (!lastPrice) return alert("No price yet");
+            const entry = { t: new Date().toLocaleTimeString([],{hour12:false}), dir, p: lastPrice.toLocaleString('en-US') };
+            manualBets.unshift(entry);
+            if (manualBets.length > 40) manualBets.pop();
+            localStorage.setItem('btc5m_bets', JSON.stringify(manualBets));
+
+            let html = manualBets.map(b => `
+                <div class="flex justify-between py-1 border-b border-zinc-800 text-sm">
+                    <span>${b.t}</span>
+                    <span class="${b.dir==='UP'?'text-emerald-400':'text-red-400'} font-bold">${b.dir} @ $${b.p}</span>
+                </div>
+            `).join('');
+            document.getElementById('manual-log') = html || '<div class="text-zinc-500 py-4">No bets yet</div>';
+        }
+
+        function initChart() {
+            chart = new Chart(document.getElementById('priceChart'), {
+                type: 'line',
+                data: { labels: [], datasets: [{ data: [], borderColor: '#10b981', tension: 0.3, borderWidth: 2.5, pointRadius: 0 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { ticks: { color: '#666', font: {size:10} } }, y: { ticks: { color: '#666', font: {size:10} } } },
+                    animation: false
+                }
+            });
+        }
+
+        function updateChart() {
+            chart.data.labels = priceHistory.map(h => new Date(h.t).toLocaleTimeString([],{minute:'2-digit',second:'2-digit'}));
+            chart.data.datasets[0].data = priceHistory.map(h => h.p);
+            chart.update('none');
+        }
+
+        function startCountdown() {
+            setInterval(() => {
+                const d = new Date();
+                let s = d.getMinutes() * 60 + d.getSeconds();
+                let rem = 300 - (s % 300);
+                const m = Math.floor(rem / 60);
+                const sec = rem % 60;
+                document.getElementById('countdown').textContent = `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+            }, 333);
+        }
+
+        window.onload = () => {
+            initChart();
+            connect();
+            startCountdown();
+            renderHistory();
+
+            // Fake data so chart isn't empty
+            const base = 70300;
+            for (let i = 0; i < 90; i++) {
+                priceHistory.push({t: Date.now() - (89-i)*7000, p: base + Math.random()*500 - 250});
+            }
+            updateChart();
+        };
+    </script>
+</body>
+</html>
