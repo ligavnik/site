@@ -7,334 +7,111 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
 :root {
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #12121a;
-  --bg-card: #16161f;
-  --bg-card-hover: #1a1a25;
-  --border: #1e1e2a;
-  --border-glow: #2a2a3a;
-  --text-primary: #e8e8f0;
-  --text-secondary: #8888a0;
-  --text-muted: #555568;
-  --green: #00e676;
-  --green-dim: #00e67633;
-  --green-bg: #00e67610;
-  --red: #ff1744;
-  --red-dim: #ff174433;
-  --red-bg: #ff174410;
-  --blue: #448aff;
-  --blue-dim: #448aff33;
-  --amber: #ffab00;
-  --amber-dim: #ffab0033;
-  --purple: #7c4dff;
-  --purple-dim: #7c4dff22;
-  --cyan: #00e5ff;
+  --bg-primary: #0a0a0f; --bg-secondary: #12121a; --bg-card: #16161f;
+  --bg-card-hover: #1a1a25; --border: #1e1e2a; --border-glow: #2a2a3a;
+  --text-primary: #e8e8f0; --text-secondary: #8888a0; --text-muted: #555568;
+  --green: #00e676; --green-dim: #00e67633; --green-bg: #00e67610;
+  --red: #ff1744; --red-dim: #ff174433; --red-bg: #ff174410;
+  --blue: #448aff; --blue-dim: #448aff33; --amber: #ffab00; --amber-dim: #ffab0033;
+  --purple: #7c4dff; --purple-dim: #7c4dff22; --cyan: #00e5ff;
 }
-
-body {
-  font-family: 'Outfit', sans-serif;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-.noise-overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 9999;
-}
-
-.grid-bg {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background-image:
-    linear-gradient(rgba(68, 138, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(68, 138, 255, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none; z-index: 0;
-}
-
+body { font-family: 'Outfit', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
+.noise-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 9999; }
+.grid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(68,138,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(68,138,255,0.03) 1px, transparent 1px); background-size: 60px 60px; pointer-events: none; z-index: 0; }
 .app { position: relative; z-index: 1; max-width: 1440px; margin: 0 auto; padding: 20px; }
-
-/* HEADER */
-.header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 24px; margin-bottom: 24px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-}
+.header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; margin-bottom: 24px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 16px; }
 .logo-section { display: flex; align-items: center; gap: 14px; }
-.logo-icon {
-  width: 42px; height: 42px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--blue), var(--purple));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; font-weight: 800;
-  box-shadow: 0 0 20px var(--blue-dim);
-}
+.logo-icon { width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, var(--blue), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; box-shadow: 0 0 20px var(--blue-dim); }
 .logo-text { font-size: 22px; font-weight: 800; letter-spacing: 3px; }
 .logo-sub { font-size: 11px; color: var(--text-muted); letter-spacing: 2px; font-weight: 500; }
 .header-status { display: flex; align-items: center; gap: 16px; }
-.status-dot {
-  width: 8px; height: 8px; border-radius: 50%; background: var(--green);
-  box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
-}
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 8px var(--amber); animation: pulse 2s infinite; }
+.status-dot.live { background: var(--green); box-shadow: 0 0 8px var(--green); }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 .status-text { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary); }
-.chainlink-badge {
-  display: flex; align-items: center; gap: 6px; padding: 6px 12px;
-  background: var(--purple-dim); border: 1px solid #7c4dff44;
-  border-radius: 8px; font-size: 11px; font-weight: 600; color: var(--purple);
-  letter-spacing: 1px;
-}
-
-/* BTC PRICE HERO */
-.price-hero {
-  text-align: center; padding: 40px 24px 30px;
-  margin-bottom: 24px; border-radius: 16px;
-  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-  border: 1px solid var(--border);
-  position: relative; overflow: hidden;
-}
-.price-hero::before {
-  content: ''; position: absolute; top: -50%; left: -50%;
-  width: 200%; height: 200%;
-  background: radial-gradient(circle at 50% 50%, var(--blue-dim) 0%, transparent 50%);
-  animation: heroGlow 8s ease-in-out infinite;
-}
-@keyframes heroGlow {
-  0%, 100% { transform: scale(1); opacity: 0.3; }
-  50% { transform: scale(1.2); opacity: 0.6; }
-}
-.price-label {
-  font-size: 12px; color: var(--text-muted); letter-spacing: 3px;
-  font-weight: 600; margin-bottom: 8px; position: relative;
-}
-.price-value {
-  font-family: 'JetBrains Mono', monospace; font-size: 56px; font-weight: 700;
-  position: relative; transition: color 0.3s;
-}
-.price-value.up { color: var(--green); }
-.price-value.down { color: var(--red); }
-.price-value.neutral { color: var(--text-primary); }
-.price-change {
-  font-family: 'JetBrains Mono', monospace; font-size: 16px;
-  margin-top: 8px; position: relative;
-}
-.price-change.up { color: var(--green); }
-.price-change.down { color: var(--red); }
-.price-meta {
-  display: flex; justify-content: center; gap: 32px; margin-top: 16px;
-  font-size: 12px; color: var(--text-muted); position: relative;
-  font-family: 'JetBrains Mono', monospace;
-}
+.chainlink-badge { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--purple-dim); border: 1px solid #7c4dff44; border-radius: 8px; font-size: 11px; font-weight: 600; color: var(--purple); letter-spacing: 1px; }
+.price-hero { text-align: center; padding: 40px 24px 30px; margin-bottom: 24px; border-radius: 16px; background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%); border: 1px solid var(--border); position: relative; overflow: hidden; }
+.price-hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 50%, var(--blue-dim) 0%, transparent 50%); animation: heroGlow 8s ease-in-out infinite; }
+@keyframes heroGlow { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.2); opacity: 0.6; } }
+.price-label { font-size: 12px; color: var(--text-muted); letter-spacing: 3px; font-weight: 600; margin-bottom: 8px; position: relative; }
+.price-value { font-family: 'JetBrains Mono', monospace; font-size: 56px; font-weight: 700; position: relative; transition: color 0.15s; }
+.price-value.up { color: var(--green); } .price-value.down { color: var(--red); } .price-value.neutral { color: var(--text-primary); }
+.price-change { font-family: 'JetBrains Mono', monospace; font-size: 16px; margin-top: 8px; position: relative; }
+.price-change.up { color: var(--green); } .price-change.down { color: var(--red); }
+.price-meta { display: flex; justify-content: center; gap: 24px; margin-top: 16px; font-size: 11px; color: var(--text-muted); position: relative; font-family: 'JetBrains Mono', monospace; flex-wrap: wrap; }
 .price-meta span { display: flex; align-items: center; gap: 6px; }
-
-/* MAIN GRID */
-.main-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;
-}
+.main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
 @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
-
-.card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 16px; padding: 24px; position: relative; overflow: hidden;
-  transition: border-color 0.3s;
-}
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; position: relative; overflow: hidden; transition: border-color 0.3s; }
 .card:hover { border-color: var(--border-glow); }
-.card-header {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
-}
-.card-title {
-  font-size: 14px; font-weight: 700; letter-spacing: 2px;
-  color: var(--text-secondary); text-transform: uppercase;
-}
-.card-badge {
-  padding: 4px 10px; border-radius: 6px; font-size: 10px;
-  font-weight: 600; letter-spacing: 1px;
-  font-family: 'JetBrains Mono', monospace;
-}
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.card-title { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--text-secondary); text-transform: uppercase; }
+.card-badge { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 600; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; }
 .badge-live { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-dim); }
 .badge-ai { background: var(--purple-dim); color: var(--purple); border: 1px solid #7c4dff44; }
 .badge-history { background: var(--amber-dim); color: var(--amber); border: 1px solid #ffab0044; }
 .badge-x { background: var(--cyan); color: var(--bg-primary); border: 1px solid var(--cyan); }
-
-/* PREDICTION DISPLAY */
-.prediction-display {
-  display: flex; flex-direction: column; align-items: center;
-  padding: 20px 0;
-}
-.prediction-direction {
-  font-size: 72px; font-weight: 900; line-height: 1;
-  margin-bottom: 8px; transition: all 0.5s;
-}
+.prediction-display { display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
+.prediction-direction { font-size: 72px; font-weight: 900; line-height: 1; margin-bottom: 8px; transition: all 0.5s; }
 .prediction-direction.up { color: var(--green); text-shadow: 0 0 40px var(--green-dim); }
 .prediction-direction.down { color: var(--red); text-shadow: 0 0 40px var(--red-dim); }
-.prediction-confidence {
-  font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text-secondary);
-  margin-bottom: 16px;
-}
-.confidence-bar {
-  width: 100%; height: 6px; background: var(--bg-primary);
-  border-radius: 3px; overflow: hidden; margin-bottom: 16px;
-}
-.confidence-fill {
-  height: 100%; border-radius: 3px; transition: width 0.8s ease, background 0.5s;
-}
+.prediction-confidence { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; }
+.confidence-bar { width: 100%; height: 6px; background: var(--bg-primary); border-radius: 3px; overflow: hidden; margin-bottom: 16px; }
+.confidence-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease, background 0.5s; }
 .confidence-fill.up { background: linear-gradient(90deg, var(--green-dim), var(--green)); }
 .confidence-fill.down { background: linear-gradient(90deg, var(--red-dim), var(--red)); }
-
-.prediction-factors {
-  width: 100%; display: flex; flex-direction: column; gap: 8px; margin-top: 8px;
-}
-.factor {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 12px; background: var(--bg-primary); border-radius: 8px;
-  font-size: 12px;
-}
-.factor-label { color: var(--text-muted); }
-.factor-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
-.factor-value.bullish { color: var(--green); }
-.factor-value.bearish { color: var(--red); }
-.factor-value.neutral { color: var(--amber); }
-
-/* COUNTDOWN */
-.countdown-section {
-  text-align: center; padding: 12px; margin-top: 16px;
-  background: var(--bg-primary); border-radius: 10px;
-}
+.prediction-factors { width: 100%; display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.factor { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-primary); border-radius: 8px; font-size: 12px; }
+.factor-label { color: var(--text-muted); } .factor-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+.factor-value.bullish { color: var(--green); } .factor-value.bearish { color: var(--red); } .factor-value.neutral { color: var(--amber); }
+.countdown-section { text-align: center; padding: 12px; margin-top: 16px; background: var(--bg-primary); border-radius: 10px; }
 .countdown-label { font-size: 10px; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 4px; }
-.countdown-value {
-  font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700;
-  color: var(--blue);
-}
-
-/* HISTORY TABLE */
+.countdown-value { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: var(--blue); }
 .history-table { width: 100%; }
-.history-row {
-  display: grid; grid-template-columns: 1fr 0.7fr 0.7fr 0.8fr 0.6fr;
-  padding: 10px 12px; border-bottom: 1px solid var(--border);
-  font-size: 12px; align-items: center;
-  font-family: 'JetBrains Mono', monospace;
-}
-.history-row.header {
-  color: var(--text-muted); font-size: 10px; letter-spacing: 1px;
-  font-family: 'Outfit', sans-serif; font-weight: 600;
-}
-.history-row:last-child { border-bottom: none; }
-.result-correct { color: var(--green); font-weight: 600; }
-.result-wrong { color: var(--red); font-weight: 600; }
-.result-pending { color: var(--amber); font-weight: 600; }
-
-/* X ANALYSIS */
+.history-row { display: grid; grid-template-columns: 1fr 0.7fr 0.7fr 0.8fr 0.6fr; padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 12px; align-items: center; font-family: 'JetBrains Mono', monospace; }
+.history-row.header { color: var(--text-muted); font-size: 10px; letter-spacing: 1px; font-family: 'Outfit', sans-serif; font-weight: 600; }
+.result-correct { color: var(--green); font-weight: 600; } .result-wrong { color: var(--red); font-weight: 600; } .result-pending { color: var(--amber); font-weight: 600; }
 .x-feed { display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; }
-.x-feed::-webkit-scrollbar { width: 4px; }
-.x-feed::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-.x-item {
-  padding: 12px; background: var(--bg-primary); border-radius: 10px;
-  border-left: 3px solid var(--border); transition: border-color 0.3s;
-}
-.x-item.bullish { border-left-color: var(--green); }
-.x-item.bearish { border-left-color: var(--red); }
-.x-item.neutral { border-left-color: var(--amber); }
+.x-feed::-webkit-scrollbar { width: 4px; } .x-feed::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.x-item { padding: 12px; background: var(--bg-primary); border-radius: 10px; border-left: 3px solid var(--border); }
+.x-item.bullish { border-left-color: var(--green); } .x-item.bearish { border-left-color: var(--red); } .x-item.neutral { border-left-color: var(--amber); }
 .x-item-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
 .x-item-author { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
 .x-item-time { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
 .x-item-text { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
-.x-item-sentiment {
-  display: inline-block; margin-top: 6px; padding: 2px 8px;
-  border-radius: 4px; font-size: 10px; font-weight: 600;
-  font-family: 'JetBrains Mono', monospace;
-}
+.x-item-sentiment { display: inline-block; margin-top: 6px; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
 .x-item-sentiment.bullish { background: var(--green-bg); color: var(--green); }
 .x-item-sentiment.bearish { background: var(--red-bg); color: var(--red); }
 .x-item-sentiment.neutral { background: var(--amber-dim); color: var(--amber); }
-
-/* MARKET STATS */
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.stat-item {
-  padding: 14px; background: var(--bg-primary); border-radius: 10px;
-  text-align: center;
-}
+.stat-item { padding: 14px; background: var(--bg-primary); border-radius: 10px; text-align: center; }
 .stat-label { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 4px; }
-.stat-value {
-  font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700;
-}
-
-/* FULL WIDTH CARDS */
-.full-width { grid-column: 1 / -1; }
-
-/* MINI CHART */
-.mini-chart {
-  width: 100%; height: 120px; margin-top: 12px; position: relative;
-}
+.stat-value { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; }
+.mini-chart { width: 100%; height: 120px; margin-top: 12px; position: relative; }
 .mini-chart canvas { width: 100%; height: 100%; }
-
-/* ACCURACY RING */
 .accuracy-section { display: flex; align-items: center; gap: 24px; margin-top: 16px; }
-.accuracy-ring {
-  width: 100px; height: 100px; position: relative; flex-shrink: 0;
-}
+.accuracy-ring { width: 100px; height: 100px; position: relative; flex-shrink: 0; }
 .accuracy-ring svg { transform: rotate(-90deg); }
-.accuracy-ring-text {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700;
-}
+.accuracy-ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; }
 .accuracy-stats { flex: 1; }
-.accuracy-stat {
-  display: flex; justify-content: space-between; padding: 6px 0;
-  border-bottom: 1px solid var(--border); font-size: 13px;
-}
+.accuracy-stat { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
 .accuracy-stat:last-child { border-bottom: none; }
-
-/* SCROLLBAR */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-primary); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-/* FOOTER */
-.footer {
-  text-align: center; padding: 24px; margin-top: 24px;
-  font-size: 11px; color: var(--text-muted); letter-spacing: 1px;
-}
-
-/* LOADING */
-.loading-shimmer {
-  background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-.flash-green { animation: flashG 0.5s; }
-.flash-red { animation: flashR 0.5s; }
-@keyframes flashG { 0% { background: var(--green-bg); } 100% { background: transparent; } }
-@keyframes flashR { 0% { background: var(--red-bg); } 100% { background: transparent; } }
+::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: var(--bg-primary); } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.footer { text-align: center; padding: 24px; margin-top: 24px; font-size: 11px; color: var(--text-muted); letter-spacing: 1px; }
 </style>
 </head>
 <body>
 <div class="noise-overlay"></div>
 <div class="grid-bg"></div>
 <div class="app">
-
-  <!-- HEADER -->
   <header class="header">
     <div class="logo-section">
       <div class="logo-icon">O</div>
-      <div>
-        <div class="logo-text">ORACLE</div>
-        <div class="logo-sub">POLYMARKET BTC PREDICTOR</div>
-      </div>
+      <div><div class="logo-text">ORACLE</div><div class="logo-sub">POLYMARKET BTC PREDICTOR</div></div>
     </div>
     <div class="header-status">
-      <div class="chainlink-badge">⬡ CHAINLINK FEED</div>
+      <div class="chainlink-badge">⬡ CHAINLINK + BINANCE WS</div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div class="status-dot" id="statusDot"></div>
         <span class="status-text" id="statusText">CONNECTING...</span>
@@ -342,852 +119,246 @@ body {
     </div>
   </header>
 
-  <!-- BTC PRICE HERO -->
   <div class="price-hero">
-    <div class="price-label">BITCOIN PRICE — CHAINLINK BTC/USD ORACLE <span style="opacity:0.5;font-size:10px;">(0xF403...E88c)</span></div>
+    <div class="price-label">BITCOIN LIVE PRICE — BINANCE WEBSOCKET + CHAINLINK ORACLE</div>
     <div class="price-value neutral" id="btcPrice">$--,---.--</div>
     <div class="price-change neutral" id="btcChange">--- (---%)</div>
     <div class="price-meta">
-      <span>LAST UPDATE: <b id="lastUpdate">--:--:--</b></span>
+      <span>STREAM: <b id="lastUpdate">--:--:--</b></span>
       <span>24H HIGH: <b id="high24">$--,---</b></span>
       <span>24H LOW: <b id="low24">$--,---</b></span>
+      <span>⬡ CHAINLINK: <b id="chainlinkPrice" style="color:var(--purple)">$--,---</b></span>
       <span>ROUND: <b id="chainlinkRound">---</b></span>
       <span>ON-CHAIN: <b id="chainlinkTs">--:--:--</b></span>
-      <span>RPC: <b id="rpcSource">---</b></span>
     </div>
   </div>
 
-  <!-- MAIN GRID -->
   <div class="main-grid">
-
-    <!-- AI PREDICTION -->
     <div class="card">
-      <div class="card-header">
-        <span class="card-title">AI PREDICTION — NEXT 5 MIN</span>
-        <span class="card-badge badge-ai">◆ AI ENGINE</span>
-      </div>
+      <div class="card-header"><span class="card-title">AI PREDICTION — NEXT 5 MIN</span><span class="card-badge badge-ai">◆ AI ENGINE</span></div>
       <div class="prediction-display">
         <div class="prediction-direction neutral" id="predDirection">—</div>
         <div class="prediction-confidence" id="predConfidence">Confidence: --%</div>
-        <div class="confidence-bar">
-          <div class="confidence-fill up" id="predConfBar" style="width:0%"></div>
-        </div>
+        <div class="confidence-bar"><div class="confidence-fill up" id="predConfBar" style="width:0%"></div></div>
         <div class="prediction-factors" id="predFactors"></div>
       </div>
-      <div class="countdown-section">
-        <div class="countdown-label">NEXT PREDICTION IN</div>
-        <div class="countdown-value" id="countdown">5:00</div>
-      </div>
+      <div class="countdown-section"><div class="countdown-label">NEXT PREDICTION IN</div><div class="countdown-value" id="countdown">5:00</div></div>
     </div>
-
-    <!-- MARKET ANALYSIS -->
     <div class="card">
-      <div class="card-header">
-        <span class="card-title">MARKET ANALYSIS</span>
-        <span class="card-badge badge-live">● LIVE</span>
-      </div>
+      <div class="card-header"><span class="card-title">MARKET ANALYSIS</span><span class="card-badge badge-live">● LIVE</span></div>
       <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-label">5M MOMENTUM</div>
-          <div class="stat-value" id="momentum">--</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">VOLATILITY</div>
-          <div class="stat-value" id="volatility">--</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">TREND (15M)</div>
-          <div class="stat-value" id="trend15m">--</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">RSI (14)</div>
-          <div class="stat-value" id="rsi14">--</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">POLYMARKET UP %</div>
-          <div class="stat-value" id="polyUp" style="color:var(--green)">--</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">POLYMARKET DOWN %</div>
-          <div class="stat-value" id="polyDown" style="color:var(--red)">--</div>
-        </div>
+        <div class="stat-item"><div class="stat-label">5M MOMENTUM</div><div class="stat-value" id="momentum">--</div></div>
+        <div class="stat-item"><div class="stat-label">VOLATILITY</div><div class="stat-value" id="volatility">--</div></div>
+        <div class="stat-item"><div class="stat-label">TREND (15M)</div><div class="stat-value" id="trend15m">--</div></div>
+        <div class="stat-item"><div class="stat-label">RSI (14)</div><div class="stat-value" id="rsi14">--</div></div>
+        <div class="stat-item"><div class="stat-label">POLYMARKET UP %</div><div class="stat-value" id="polyUp" style="color:var(--green)">--</div></div>
+        <div class="stat-item"><div class="stat-label">POLYMARKET DOWN %</div><div class="stat-value" id="polyDown" style="color:var(--red)">--</div></div>
       </div>
-      <div class="mini-chart">
-        <canvas id="priceChart"></canvas>
-      </div>
+      <div class="mini-chart"><canvas id="priceChart"></canvas></div>
     </div>
-
-    <!-- X ANALYSIS -->
     <div class="card">
-      <div class="card-header">
-        <span class="card-title">X / SOCIAL SENTIMENT</span>
-        <span class="card-badge badge-x">𝕏 ANALYSIS</span>
-      </div>
+      <div class="card-header"><span class="card-title">X / SOCIAL SENTIMENT</span><span class="card-badge badge-x">𝕏 ANALYSIS</span></div>
       <div class="x-feed" id="xFeed"></div>
-      <div style="margin-top:12px; padding:10px; background:var(--bg-primary); border-radius:8px; display:flex; justify-content:space-between;">
-        <div>
-          <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;">OVERALL SENTIMENT</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;" id="overallSentiment">--</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;">POSTS ANALYZED</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;" id="postsAnalyzed">--</div>
-        </div>
+      <div style="margin-top:12px;padding:10px;background:var(--bg-primary);border-radius:8px;display:flex;justify-content:space-between;">
+        <div><div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;">OVERALL SENTIMENT</div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;" id="overallSentiment">--</div></div>
+        <div style="text-align:right;"><div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;">POSTS ANALYZED</div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;" id="postsAnalyzed">--</div></div>
       </div>
     </div>
-
-    <!-- PREDICTION HISTORY -->
     <div class="card">
-      <div class="card-header">
-        <span class="card-title">PREDICTION HISTORY</span>
-        <span class="card-badge badge-history">◷ HISTORY</span>
-      </div>
+      <div class="card-header"><span class="card-title">PREDICTION HISTORY</span><span class="card-badge badge-history">◷ HISTORY</span></div>
       <div class="accuracy-section">
         <div class="accuracy-ring">
-          <svg width="100" height="100" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--border)" stroke-width="8"/>
-            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--green)" stroke-width="8"
-              stroke-dasharray="264" id="accuracyCircle" stroke-dashoffset="264" stroke-linecap="round"/>
-          </svg>
+          <svg width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="var(--border)" stroke-width="8"/><circle cx="50" cy="50" r="42" fill="none" stroke="var(--green)" stroke-width="8" stroke-dasharray="264" id="accuracyCircle" stroke-dashoffset="264" stroke-linecap="round"/></svg>
           <div class="accuracy-ring-text" id="accuracyPct">--%</div>
         </div>
         <div class="accuracy-stats">
-          <div class="accuracy-stat">
-            <span style="color:var(--text-muted)">Total Predictions</span>
-            <span id="totalPreds" style="font-family:'JetBrains Mono',monospace;font-weight:600;">0</span>
-          </div>
-          <div class="accuracy-stat">
-            <span style="color:var(--green)">Correct ✓</span>
-            <span id="correctPreds" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--green)">0</span>
-          </div>
-          <div class="accuracy-stat">
-            <span style="color:var(--red)">Wrong ✗</span>
-            <span id="wrongPreds" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--red)">0</span>
-          </div>
-          <div class="accuracy-stat">
-            <span style="color:var(--amber)">Pending ◌</span>
-            <span id="pendingPreds" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--amber)">0</span>
-          </div>
+          <div class="accuracy-stat"><span style="color:var(--text-muted)">Total</span><span id="totalPreds" style="font-family:'JetBrains Mono',monospace;font-weight:600;">0</span></div>
+          <div class="accuracy-stat"><span style="color:var(--green)">Correct ✓</span><span id="correctPreds" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--green)">0</span></div>
+          <div class="accuracy-stat"><span style="color:var(--red)">Wrong ✗</span><span id="wrongPreds" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--red)">0</span></div>
+          <div class="accuracy-stat"><span style="color:var(--amber)">Pending ◌</span><span id="pendingPreds" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--amber)">0</span></div>
         </div>
       </div>
-      <div style="margin-top:16px; max-height:200px; overflow-y:auto;">
+      <div style="margin-top:16px;max-height:200px;overflow-y:auto;">
         <div class="history-table">
-          <div class="history-row header">
-            <span>TIME</span><span>PREDICTED</span><span>PRICE AT</span><span>RESULT PRICE</span><span>RESULT</span>
-          </div>
+          <div class="history-row header"><span>TIME</span><span>PREDICTED</span><span>PRICE AT</span><span>RESULT PRICE</span><span>RESULT</span></div>
           <div id="historyBody"></div>
         </div>
       </div>
     </div>
-
   </div>
-
-  <footer class="footer">
-    ORACLE v1.0 — Chainlink Data Feed — Polymarket Analysis — For Personal Use Only<br>
-    Data refreshes every 1 second · Predictions every 5 minutes · All data persisted locally
-  </footer>
+  <footer class="footer">ORACLE v2.0 — Binance WebSocket (real-time) + Chainlink On-Chain Oracle (reference) — Predictions synced to :00 :05 :10 :15 etc</footer>
 </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
 <script>
-// ============================================================================
-// DATABASE — localStorage persistence
-// ============================================================================
-const DB = {
-  get(key, fallback = null) {
-    try {
-      const v = localStorage.getItem('oracle_' + key);
-      return v ? JSON.parse(v) : fallback;
-    } catch { return fallback; }
-  },
-  set(key, val) {
-    localStorage.setItem('oracle_' + key, JSON.stringify(val));
-  },
-  appendToArray(key, item, maxLen = 200) {
-    const arr = this.get(key, []);
-    arr.unshift(item);
-    if (arr.length > maxLen) arr.length = maxLen;
-    this.set(key, arr);
-    return arr;
-  }
-};
+const DB={get(k,fb=null){try{const v=localStorage.getItem('oracle_'+k);return v?JSON.parse(v):fb}catch{return fb}},set(k,v){localStorage.setItem('oracle_'+k,JSON.stringify(v))}};
+let state={currentPrice:DB.get('lastPrice',0),previousPrice:0,priceHistory:DB.get('priceHistory',[]),predictions:DB.get('predictions',[]),xPosts:DB.get('xPosts',[]),high24:DB.get('high24',0),low24:DB.get('low24',999999),polymarketUp:50,polymarketDown:50,chainlinkPrice:DB.get('chainlinkPrice',0)};
 
-// ============================================================================
-// STATE
-// ============================================================================
-let state = {
-  currentPrice: DB.get('lastPrice', 0),
-  previousPrice: 0,
-  priceHistory: DB.get('priceHistory', []),    // {time, price}
-  predictions: DB.get('predictions', []),       // {id, time, direction, confidence, priceAt, resultPrice, result, factors}
-  xPosts: DB.get('xPosts', []),
-  high24: DB.get('high24', 0),
-  low24: DB.get('low24', 999999),
-  lastFetchTime: 0,
-  polymarketUp: 50,
-  polymarketDown: 50,
-};
-
-// ============================================================================
-// CHAINLINK BTC/USD PRICE FEED — Direct on-chain read via ethers.js
-// Contract: 0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c (Ethereum Mainnet)
-// AggregatorV3Interface — latestRoundData() returns (roundId, answer, startedAt, updatedAt, answeredInRound)
-// answer has 8 decimals (e.g., 9712345678900 = $97,123.456789)
-// ============================================================================
-const CHAINLINK_BTC_USD = '0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c';
-const AGGREGATOR_ABI = [
-  'function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)',
-  'function decimals() external view returns (uint8)',
-  'function description() external view returns (string)'
-];
-
-// Multiple public RPCs for redundancy
-const RPC_ENDPOINTS = [
-  'https://eth.llamarpc.com',
-  'https://rpc.ankr.com/eth',
-  'https://ethereum-rpc.publicnode.com',
-  'https://1rpc.io/eth',
-  'https://rpc.mevblocker.io'
-];
-
-let currentRpcIndex = 0;
-let provider = null;
-let chainlinkContract = null;
-let chainlinkDecimals = 8;
-let lastChainlinkRoundId = null;
-let lastChainlinkAnswer = null;
-let lastChainlinkTimestamp = null;
-let consecutiveErrors = 0;
-let allProviders = [];
-let allContracts = [];
-let fastestRpcIndex = 0;
-
-function initProvider() {
-  // Create all providers upfront
-  allProviders = RPC_ENDPOINTS.map(url => new ethers.JsonRpcProvider(url));
-  allContracts = allProviders.map(p => new ethers.Contract(CHAINLINK_BTC_USD, AGGREGATOR_ABI, p));
-  provider = allProviders[0];
-  chainlinkContract = allContracts[0];
-  console.log(`[CHAINLINK] Initialized ${RPC_ENDPOINTS.length} RPC endpoints`);
-  updateSourceDisplay(RPC_ENDPOINTS[0]);
-}
-
-function rotateRpc() {
-  currentRpcIndex = (currentRpcIndex + 1) % RPC_ENDPOINTS.length;
-  provider = allProviders[currentRpcIndex];
-  chainlinkContract = allContracts[currentRpcIndex];
-  console.log(`[CHAINLINK] Rotated to: ${RPC_ENDPOINTS[currentRpcIndex]}`);
-  updateSourceDisplay(RPC_ENDPOINTS[currentRpcIndex]);
-}
-
-function updateSourceDisplay(rpc) {
-  const el = document.getElementById('rpcSource');
-  if (el) el.textContent = rpc.replace('https://', '').split('/')[0];
-}
-
-// Race all RPCs — whoever responds first wins
-let useRace = true;
-let raceInFlight = false;
-
-async function fetchBTCPrice() {
-  // On first call, race all RPCs to find the fastest
-  if (useRace && !raceInFlight) {
-    raceInFlight = true;
-    try {
-      const racePromises = allContracts.map((c, i) => {
-        const start = performance.now();
-        return c.latestRoundData().then(data => ({
-          data, index: i, time: performance.now() - start
-        }));
-      });
-
-      const winner = await Promise.any(racePromises);
-      fastestRpcIndex = winner.index;
-      currentRpcIndex = fastestRpcIndex;
-      provider = allProviders[fastestRpcIndex];
-      chainlinkContract = allContracts[fastestRpcIndex];
-      console.log(`[CHAINLINK] Fastest RPC: ${RPC_ENDPOINTS[fastestRpcIndex]} (${winner.time.toFixed(0)}ms)`);
-      updateSourceDisplay(RPC_ENDPOINTS[fastestRpcIndex]);
-
-      // Use single fastest RPC from now on
-      useRace = false;
-      raceInFlight = false;
-      return processRoundData(winner.data);
-    } catch (e) {
-      raceInFlight = false;
-      console.warn('[CHAINLINK] All RPCs failed on race:', e.message);
-      return false;
-    }
-  }
-
-  // Normal single-RPC fetch (using the fastest one found)
-  try {
-    const roundData = await chainlinkContract.latestRoundData();
-    consecutiveErrors = 0;
-    return processRoundData(roundData);
-  } catch (e) {
-    consecutiveErrors++;
-    if (consecutiveErrors >= 3) {
-      rotateRpc();
-      consecutiveErrors = 0;
-    }
-    document.getElementById('statusDot').style.background = 'var(--amber)';
-    document.getElementById('statusText').textContent = 'RETRYING...';
-    return false;
-  }
-}
-
-function processRoundData(roundData) {
-  const rawAnswer = roundData.answer;
-  const price = Number(rawAnswer) / Math.pow(10, chainlinkDecimals);
-  const updatedAt = Number(roundData.updatedAt);
-  const roundId = roundData.roundId.toString();
-
-  if (price <= 0 || isNaN(price)) return false;
-
-  lastChainlinkRoundId = roundId;
-  lastChainlinkAnswer = rawAnswer.toString();
-  lastChainlinkTimestamp = updatedAt;
-
-  state.previousPrice = state.currentPrice;
-  state.currentPrice = price;
-  state.lastFetchTime = Date.now();
-  state.chainlinkUpdatedAt = updatedAt;
-
-  if (price > state.high24) { state.high24 = price; DB.set('high24', price); }
-  if (price < state.low24) { state.low24 = price; DB.set('low24', price); }
-
-  const lastEntry = state.priceHistory[state.priceHistory.length - 1];
-  if (!lastEntry || lastEntry.price !== price || Date.now() - lastEntry.time > 2000) {
-    const entry = { time: Date.now(), price, roundId, chainlinkTs: updatedAt };
-    state.priceHistory.push(entry);
-    if (state.priceHistory.length > 1000) state.priceHistory = state.priceHistory.slice(-1000);
-    DB.set('priceHistory', state.priceHistory.slice(-500));
-  }
-  DB.set('lastPrice', price);
-
-  updatePriceUI();
-  updateChainlinkMeta();
-  updateMarketAnalysis();
-  drawChart();
-
-  document.getElementById('statusDot').style.background = 'var(--green)';
-  document.getElementById('statusText').textContent = 'LIVE — CHAINLINK FEED';
-  return true;
-}
-
-function updateChainlinkMeta() {
-  const el = document.getElementById('chainlinkRound');
-  if (el && lastChainlinkRoundId) {
-    // Show shortened round ID
-    const short = lastChainlinkRoundId.length > 12
-      ? lastChainlinkRoundId.slice(0, 6) + '...' + lastChainlinkRoundId.slice(-4)
-      : lastChainlinkRoundId;
-    el.textContent = short;
-  }
-  const tsEl = document.getElementById('chainlinkTs');
-  if (tsEl && lastChainlinkTimestamp) {
-    const d = new Date(lastChainlinkTimestamp * 1000);
-    tsEl.textContent = d.toLocaleTimeString();
-  }
-}
-
-// ============================================================================
-// UI UPDATES
-// ============================================================================
-function formatPrice(p) {
-  return '$' + p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function updatePriceUI() {
-  const el = document.getElementById('btcPrice');
-  const changeEl = document.getElementById('btcChange');
-
-  el.textContent = formatPrice(state.currentPrice);
-
-  const diff = state.currentPrice - state.previousPrice;
-  const pct = state.previousPrice ? ((diff / state.previousPrice) * 100) : 0;
-
-  if (diff > 0) {
-    el.className = 'price-value up';
-    changeEl.className = 'price-change up';
-    changeEl.textContent = `+${formatPrice(diff)} (+${pct.toFixed(4)}%)`;
-    el.classList.add('flash-green');
-    setTimeout(() => el.classList.remove('flash-green'), 500);
-  } else if (diff < 0) {
-    el.className = 'price-value down';
-    changeEl.className = 'price-change down';
-    changeEl.textContent = `${formatPrice(diff)} (${pct.toFixed(4)}%)`;
-    el.classList.add('flash-red');
-    setTimeout(() => el.classList.remove('flash-red'), 500);
-  }
-
-  document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
-  document.getElementById('high24').textContent = formatPrice(state.high24);
-  document.getElementById('low24').textContent = state.low24 < 999999 ? formatPrice(state.low24) : '$--,---';
-
-  document.getElementById('statusText').textContent = 'LIVE — ' + new Date().toLocaleTimeString();
-  document.getElementById('statusDot').style.background = 'var(--green)';
-}
-
-// ============================================================================
-// MARKET ANALYSIS
-// ============================================================================
-function updateMarketAnalysis() {
-  const hist = state.priceHistory;
-  if (hist.length < 2) return;
-
-  // 5min momentum
-  const fiveMinAgo = Date.now() - 5 * 60 * 1000;
-  const recent = hist.filter(h => h.time > fiveMinAgo);
-  let momentumVal = 0;
-  if (recent.length > 1) {
-    momentumVal = ((recent[recent.length - 1].price - recent[0].price) / recent[0].price * 100);
-  }
-  const momEl = document.getElementById('momentum');
-  momEl.textContent = (momentumVal >= 0 ? '+' : '') + momentumVal.toFixed(3) + '%';
-  momEl.style.color = momentumVal >= 0 ? 'var(--green)' : 'var(--red)';
-
-  // Volatility (std dev of last 30 price points)
-  const last30 = hist.slice(-30).map(h => h.price);
-  const mean = last30.reduce((a, b) => a + b, 0) / last30.length;
-  const variance = last30.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / last30.length;
-  const vol = Math.sqrt(variance);
-  const volPct = (vol / mean * 100).toFixed(3);
-  const volEl = document.getElementById('volatility');
-  volEl.textContent = volPct + '%';
-  volEl.style.color = volPct > 0.1 ? 'var(--amber)' : 'var(--text-primary)';
-
-  // 15min trend
-  const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
-  const trend15 = hist.filter(h => h.time > fifteenMinAgo);
-  let trendVal = 0;
-  if (trend15.length > 1) {
-    trendVal = ((trend15[trend15.length - 1].price - trend15[0].price) / trend15[0].price * 100);
-  }
-  const trendEl = document.getElementById('trend15m');
-  trendEl.textContent = trendVal >= 0 ? '▲ BULLISH' : '▼ BEARISH';
-  trendEl.style.color = trendVal >= 0 ? 'var(--green)' : 'var(--red)';
-
-  // RSI (simplified 14-period)
-  const rsiPeriod = Math.min(14, hist.length - 1);
-  let gains = 0, losses = 0;
-  for (let i = hist.length - rsiPeriod; i < hist.length; i++) {
-    const diff = hist[i].price - hist[i - 1].price;
-    if (diff > 0) gains += diff; else losses -= diff;
-  }
-  const avgGain = gains / rsiPeriod;
-  const avgLoss = losses / rsiPeriod;
-  const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
-  const rsi = 100 - (100 / (1 + rs));
-  const rsiEl = document.getElementById('rsi14');
-  rsiEl.textContent = rsi.toFixed(1);
-  rsiEl.style.color = rsi > 70 ? 'var(--red)' : rsi < 30 ? 'var(--green)' : 'var(--amber)';
-
-  // Simulated Polymarket odds (based on momentum + sentiment)
-  const baseBias = 50 + momentumVal * 100 + (Math.random() - 0.5) * 5;
-  state.polymarketUp = Math.max(15, Math.min(85, baseBias)).toFixed(1);
-  state.polymarketDown = (100 - state.polymarketUp).toFixed(1);
-  document.getElementById('polyUp').textContent = state.polymarketUp + '%';
-  document.getElementById('polyDown').textContent = state.polymarketDown + '%';
-}
-
-// ============================================================================
-// MINI PRICE CHART
-// ============================================================================
-function drawChart() {
-  const canvas = document.getElementById('priceChart');
-  const ctx = canvas.getContext('2d');
-  const rect = canvas.parentElement.getBoundingClientRect();
-  canvas.width = rect.width * 2;
-  canvas.height = rect.height * 2;
-  ctx.scale(2, 2);
-  const W = rect.width, H = rect.height;
-
-  const data = state.priceHistory.slice(-120);
-  if (data.length < 2) return;
-
-  ctx.clearRect(0, 0, W, H);
-
-  const prices = data.map(d => d.price);
-  const min = Math.min(...prices) * 0.9999;
-  const max = Math.max(...prices) * 1.0001;
-  const range = max - min || 1;
-
-  // Gradient fill
-  const isUp = prices[prices.length - 1] >= prices[0];
-  const lineColor = isUp ? '#00e676' : '#ff1744';
-  const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, isUp ? 'rgba(0,230,118,0.15)' : 'rgba(255,23,68,0.15)');
-  grad.addColorStop(1, 'rgba(0,0,0,0)');
-
-  ctx.beginPath();
-  data.forEach((d, i) => {
-    const x = (i / (data.length - 1)) * W;
-    const y = H - ((d.price - min) / range) * H * 0.85 - H * 0.05;
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  });
-  ctx.strokeStyle = lineColor;
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  // Fill
-  ctx.lineTo(W, H);
-  ctx.lineTo(0, H);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // Current price dot
-  const lastX = W;
-  const lastY = H - ((prices[prices.length - 1] - min) / range) * H * 0.85 - H * 0.05;
-  ctx.beginPath();
-  ctx.arc(lastX - 2, lastY, 4, 0, Math.PI * 2);
-  ctx.fillStyle = lineColor;
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(lastX - 2, lastY, 7, 0, Math.PI * 2);
-  ctx.strokeStyle = lineColor + '44';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-}
-
-// ============================================================================
-// X / SOCIAL SENTIMENT SIMULATION
-// ============================================================================
-const xAuthors = [
-  'CryptoWhale', 'BTCAnalyst', 'ChainlinkGod', 'DegenTrader', 'MarketMinds',
-  'OnChainWiz', 'CryptoCapo', 'BitcoinMagazine', 'WhalePanda', 'HsakaTrades',
-  'CryptoCred', 'AltcoinSherpa', 'Pentosh1', 'CryptoMichNL', 'TraderXO',
-  'TheCryptoLark', 'InvestAnswers', 'CryptoRover', 'ColdBloodShill', 'Rekt_Capital'
-];
-const bullishPosts = [
-  'BTC breaking through resistance. Next leg up incoming. 🚀',
-  'Chainlink data showing massive accumulation. Whales buying.',
-  'Polymarket 5min resolution favoring UP. Smart money agrees.',
-  'Hash rate at ATH. Fundamentals never looked stronger.',
-  'Short liquidations piling up. Bears getting rekt.',
-  'Volume profile suggests breakout. Loading up here.',
-  'On-chain metrics screaming bullish. HODL tight.',
-  'BTC dominance rising. Alt season after this pump.',
-  'Spot buying pressure intense on major exchanges. Bullish.',
-  'Macro tailwinds + strong technicals = up only.'
-];
-const bearishPosts = [
-  'BTC showing weakness at key level. Expecting rejection.',
-  'Funding rates extremely high. Leverage flush incoming.',
-  'Polymarket DOWN bets increasing. Big players positioning short.',
-  'Whale wallets moving to exchanges. Sell pressure building.',
-  'RSI divergence on 4H. Classic reversal pattern forming.',
-  'Exchange inflows spiking. Distribution phase likely.',
-  'CME gap below. History says it fills. Caution.',
-  'Retail euphoria peaking. This is usually the top signal.',
-  'BTC struggling with resistance. Lower highs forming.',
-  'Volume declining on rallies. Bears gaining control.'
-];
-const neutralPosts = [
-  'BTC consolidating. Waiting for clear direction before entry.',
-  'Mixed signals across timeframes. Patience is key right now.',
-  'Watching the 5min Polymarket resolution closely. Could go either way.',
-  'Interesting on-chain data. Need more confirmation.',
-  'Markets digesting recent moves. Range-bound for now.'
-];
-
-function generateXPosts() {
-  const momentum = state.priceHistory.length > 10 ?
-    state.priceHistory[state.priceHistory.length - 1].price - state.priceHistory[Math.max(0, state.priceHistory.length - 10)].price : 0;
-
-  const posts = [];
-  const count = 3 + Math.floor(Math.random() * 3);
-  for (let i = 0; i < count; i++) {
-    const rand = Math.random();
-    let sentiment, text;
-    const bias = momentum > 0 ? 0.15 : momentum < 0 ? -0.15 : 0;
-
-    if (rand + bias > 0.6) {
-      sentiment = 'bullish';
-      text = bullishPosts[Math.floor(Math.random() * bullishPosts.length)];
-    } else if (rand + bias < 0.35) {
-      sentiment = 'bearish';
-      text = bearishPosts[Math.floor(Math.random() * bearishPosts.length)];
-    } else {
-      sentiment = 'neutral';
-      text = neutralPosts[Math.floor(Math.random() * neutralPosts.length)];
-    }
-
-    posts.push({
-      author: '@' + xAuthors[Math.floor(Math.random() * xAuthors.length)],
-      text, sentiment,
-      time: new Date().toLocaleTimeString()
-    });
-  }
-
-  state.xPosts = posts.concat(state.xPosts).slice(0, 30);
-  DB.set('xPosts', state.xPosts.slice(0, 30));
-  renderXFeed();
-}
-
-function renderXFeed() {
-  const container = document.getElementById('xFeed');
-  container.innerHTML = state.xPosts.slice(0, 10).map(p => `
-    <div class="x-item ${p.sentiment}">
-      <div class="x-item-header">
-        <span class="x-item-author">${p.author}</span>
-        <span class="x-item-time">${p.time}</span>
-      </div>
-      <div class="x-item-text">${p.text}</div>
-      <span class="x-item-sentiment ${p.sentiment}">${p.sentiment.toUpperCase()}</span>
-    </div>
-  `).join('');
-
-  // Overall sentiment
-  const bullish = state.xPosts.filter(p => p.sentiment === 'bullish').length;
-  const bearish = state.xPosts.filter(p => p.sentiment === 'bearish').length;
-  const total = state.xPosts.length;
-  const sentEl = document.getElementById('overallSentiment');
-  if (bullish > bearish) {
-    sentEl.textContent = '▲ BULLISH';
-    sentEl.style.color = 'var(--green)';
-  } else if (bearish > bullish) {
-    sentEl.textContent = '▼ BEARISH';
-    sentEl.style.color = 'var(--red)';
-  } else {
-    sentEl.textContent = '◆ NEUTRAL';
-    sentEl.style.color = 'var(--amber)';
-  }
-  document.getElementById('postsAnalyzed').textContent = total;
-}
-
-// ============================================================================
-// AI PREDICTION ENGINE
-// ============================================================================
-function generatePrediction() {
-  const hist = state.priceHistory;
-  if (hist.length < 5) return;
-
-  // --- Factors ---
-  // 1. Price momentum (5min)
-  const fiveMinAgo = Date.now() - 5 * 60 * 1000;
-  const recent = hist.filter(h => h.time > fiveMinAgo);
-  let momentum = 0;
-  if (recent.length > 1) {
-    momentum = (recent[recent.length - 1].price - recent[0].price) / recent[0].price;
-  }
-
-  // 2. RSI
-  const rsiPeriod = Math.min(14, hist.length - 1);
-  let gains = 0, losses = 0;
-  for (let i = hist.length - rsiPeriod; i < hist.length; i++) {
-    const diff = hist[i].price - hist[i - 1].price;
-    if (diff > 0) gains += diff; else losses -= diff;
-  }
-  const rs = losses === 0 ? 100 : (gains / rsiPeriod) / (losses / rsiPeriod);
-  const rsi = 100 - (100 / (1 + rs));
-  const rsiSignal = rsi > 70 ? -1 : rsi < 30 ? 1 : (50 - rsi) / 50;
-
-  // 3. Social sentiment score
-  const bullish = state.xPosts.filter(p => p.sentiment === 'bullish').length;
-  const bearish = state.xPosts.filter(p => p.sentiment === 'bearish').length;
-  const sentimentScore = state.xPosts.length > 0 ? (bullish - bearish) / state.xPosts.length : 0;
-
-  // 4. Polymarket bias
-  const polyBias = (state.polymarketUp - 50) / 50;
-
-  // 5. Volatility factor
-  const last20 = hist.slice(-20).map(h => h.price);
-  const mean = last20.reduce((a, b) => a + b, 0) / last20.length;
-  const vol = Math.sqrt(last20.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / last20.length) / mean;
-
-  // Weighted combination
-  const score = (momentum * 3000) * 0.30 +
-                rsiSignal * 0.20 +
-                sentimentScore * 0.25 +
-                polyBias * 0.15 +
-                (Math.random() - 0.5) * 0.10;
-
-  const direction = score > 0.02 ? 'UP' : score < -0.02 ? 'DOWN' : (Math.random() > 0.5 ? 'UP' : 'DOWN');
-  const confidence = Math.min(92, Math.max(35, Math.abs(score) * 120 + 40 + Math.random() * 15));
-
-  const factors = [
-    { label: 'Price Momentum', value: momentum >= 0 ? 'Bullish' : 'Bearish', cls: momentum >= 0 ? 'bullish' : 'bearish' },
-    { label: 'RSI Signal', value: rsi > 70 ? 'Overbought' : rsi < 30 ? 'Oversold' : 'Neutral', cls: rsi > 70 ? 'bearish' : rsi < 30 ? 'bullish' : 'neutral' },
-    { label: 'X Sentiment', value: sentimentScore > 0.1 ? 'Bullish' : sentimentScore < -0.1 ? 'Bearish' : 'Neutral', cls: sentimentScore > 0.1 ? 'bullish' : sentimentScore < -0.1 ? 'bearish' : 'neutral' },
-    { label: 'Polymarket Odds', value: state.polymarketUp + '% UP', cls: state.polymarketUp > 55 ? 'bullish' : state.polymarketUp < 45 ? 'bearish' : 'neutral' },
-    { label: 'Volatility', value: (vol * 100).toFixed(3) + '%', cls: vol > 0.001 ? 'bearish' : 'neutral' },
-  ];
-
-  // Check previous prediction result
-  if (state.predictions.length > 0 && state.predictions[0].result === 'PENDING') {
-    const prev = state.predictions[0];
-    if (state.currentPrice > prev.priceAt) {
-      prev.result = prev.direction === 'UP' ? 'CORRECT' : 'WRONG';
-    } else {
-      prev.result = prev.direction === 'DOWN' ? 'CORRECT' : 'WRONG';
-    }
-    prev.resultPrice = state.currentPrice;
-  }
-
-  const prediction = {
-    id: Date.now(),
-    time: new Date().toLocaleTimeString(),
-    timeStamp: Date.now(),
-    direction,
-    confidence: confidence.toFixed(1),
-    priceAt: state.currentPrice,
-    resultPrice: null,
-    result: 'PENDING',
-    factors
+// ==================== BINANCE WEBSOCKET ====================
+let ws=null,wsTimer=null;
+function connectWS(){
+  if(ws&&ws.readyState<=1)return;
+  ws=new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
+  ws.onopen=()=>{document.getElementById('statusDot').classList.add('live');document.getElementById('statusText').textContent='LIVE — BINANCE STREAM';console.log('[WS] Connected')};
+  ws.onmessage=(e)=>{
+    const d=JSON.parse(e.data),price=parseFloat(d.p);if(!price)return;
+    state.previousPrice=state.currentPrice;state.currentPrice=price;
+    if(price>state.high24){state.high24=price;DB.set('high24',price)}
+    if(price<state.low24){state.low24=price;DB.set('low24',price)}
+    const last=state.priceHistory[state.priceHistory.length-1];
+    if(!last||Date.now()-last.time>1000){state.priceHistory.push({time:Date.now(),price});if(state.priceHistory.length>1000)state.priceHistory=state.priceHistory.slice(-1000);if(state.priceHistory.length%10===0)DB.set('priceHistory',state.priceHistory.slice(-500))}
+    DB.set('lastPrice',price);updatePriceUI();
   };
-
-  state.predictions.unshift(prediction);
-  if (state.predictions.length > 200) state.predictions.length = 200;
-  DB.set('predictions', state.predictions);
-
-  updatePredictionUI(prediction);
-  updateHistoryUI();
+  ws.onclose=()=>{document.getElementById('statusDot').classList.remove('live');document.getElementById('statusText').textContent='RECONNECTING...';clearTimeout(wsTimer);wsTimer=setTimeout(connectWS,2000)};
+  ws.onerror=()=>ws.close();
 }
 
-function updatePredictionUI(pred) {
-  const dirEl = document.getElementById('predDirection');
-  dirEl.textContent = pred.direction === 'UP' ? '▲ UP' : '▼ DOWN';
-  dirEl.className = 'prediction-direction ' + (pred.direction === 'UP' ? 'up' : 'down');
-
-  document.getElementById('predConfidence').textContent = `Confidence: ${pred.confidence}%`;
-
-  const bar = document.getElementById('predConfBar');
-  bar.style.width = pred.confidence + '%';
-  bar.className = 'confidence-fill ' + (pred.direction === 'UP' ? 'up' : 'down');
-
-  const factorsEl = document.getElementById('predFactors');
-  factorsEl.innerHTML = pred.factors.map(f => `
-    <div class="factor">
-      <span class="factor-label">${f.label}</span>
-      <span class="factor-value ${f.cls}">${f.value}</span>
-    </div>
-  `).join('');
+// ==================== CHAINLINK ON-CHAIN ====================
+const CL_ADDR='0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c',CL_SEL='0xfeaf968c';
+const RPCS=['https://ethereum-rpc.publicnode.com','https://rpc.ankr.com/eth','https://eth.llamarpc.com','https://eth.meowrpc.com'];
+async function fetchChainlink(){
+  for(const rpc of RPCS){try{
+    const r=await fetch(rpc,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:CL_ADDR,data:CL_SEL},'latest']})});
+    const j=await r.json();if(j.error)continue;const h=j.result.slice(2);
+    const roundId=BigInt('0x'+h.slice(0,64)).toString(),answer=Number(BigInt('0x'+h.slice(64,128)))/1e8,updAt=Number(BigInt('0x'+h.slice(192,256)));
+    if(answer<=0)continue;state.chainlinkPrice=answer;DB.set('chainlinkPrice',answer);
+    document.getElementById('chainlinkPrice').textContent=formatPrice(answer);
+    document.getElementById('chainlinkRound').textContent=roundId.length>12?roundId.slice(0,6)+'...'+roundId.slice(-4):roundId;
+    document.getElementById('chainlinkTs').textContent=new Date(updAt*1000).toLocaleTimeString();
+    console.log(`[CHAINLINK] $${answer.toFixed(2)} via ${rpc.replace('https://','').split('/')[0]}`);return;
+  }catch{continue}}
 }
 
-function updateHistoryUI() {
-  const preds = state.predictions;
-  const correct = preds.filter(p => p.result === 'CORRECT').length;
-  const wrong = preds.filter(p => p.result === 'WRONG').length;
-  const pending = preds.filter(p => p.result === 'PENDING').length;
-  const total = preds.length;
-  const decided = correct + wrong;
-  const accuracy = decided > 0 ? ((correct / decided) * 100) : 0;
-
-  document.getElementById('totalPreds').textContent = total;
-  document.getElementById('correctPreds').textContent = correct;
-  document.getElementById('wrongPreds').textContent = wrong;
-  document.getElementById('pendingPreds').textContent = pending;
-  document.getElementById('accuracyPct').textContent = accuracy.toFixed(0) + '%';
-
-  // Accuracy ring
-  const circle = document.getElementById('accuracyCircle');
-  const offset = 264 - (264 * accuracy / 100);
-  circle.style.strokeDashoffset = offset;
-  circle.style.stroke = accuracy >= 55 ? 'var(--green)' : accuracy >= 45 ? 'var(--amber)' : 'var(--red)';
-
-  // History rows
-  const body = document.getElementById('historyBody');
-  body.innerHTML = preds.slice(0, 20).map(p => `
-    <div class="history-row">
-      <span>${p.time}</span>
-      <span style="color:${p.direction === 'UP' ? 'var(--green)' : 'var(--red)'}">${p.direction === 'UP' ? '▲ UP' : '▼ DOWN'}</span>
-      <span>${formatPrice(p.priceAt)}</span>
-      <span>${p.resultPrice ? formatPrice(p.resultPrice) : '---'}</span>
-      <span class="result-${p.result.toLowerCase()}">${p.result === 'CORRECT' ? '✓' : p.result === 'WRONG' ? '✗' : '◌'}</span>
-    </div>
-  `).join('');
+// ==================== UI ====================
+function formatPrice(p){return '$'+p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function updatePriceUI(){
+  const el=document.getElementById('btcPrice'),ch=document.getElementById('btcChange'),diff=state.currentPrice-state.previousPrice;
+  el.textContent=formatPrice(state.currentPrice);
+  const pct=state.previousPrice?((diff/state.previousPrice)*100):0;
+  if(diff>0){el.className='price-value up';ch.className='price-change up';ch.textContent=`+${formatPrice(Math.abs(diff))} (+${pct.toFixed(4)}%)`}
+  else if(diff<0){el.className='price-value down';ch.className='price-change down';ch.textContent=`-${formatPrice(Math.abs(diff))} (${pct.toFixed(4)}%)`}
+  document.getElementById('lastUpdate').textContent=new Date().toLocaleTimeString();
+  document.getElementById('high24').textContent=formatPrice(state.high24);
+  document.getElementById('low24').textContent=state.low24<999999?formatPrice(state.low24):'$--,---';
 }
 
-// ============================================================================
-// COUNTDOWN TIMER — Synced to real clock 5-minute marks
-// (00:00, 00:05, 00:10, 00:15, 00:20, 00:25, 00:30, 00:35, 00:40, 00:45, 00:50, 00:55)
-// ============================================================================
-let lastPredictionSlot = null;
-
-function getSecondsUntilNext5Min() {
-  const now = new Date();
-  const min = now.getMinutes();
-  const sec = now.getSeconds();
-  const ms = now.getMilliseconds();
-  const currentTotalSec = (min % 5) * 60 + sec + ms / 1000;
-  const remaining = 300 - currentTotalSec;
-  return remaining <= 0 ? 300 + remaining : remaining;
+// ==================== MARKET ANALYSIS ====================
+function updateMarket(){
+  const h=state.priceHistory;if(h.length<2)return;
+  const now=Date.now(),r5=h.filter(x=>x.time>now-3e5),r15=h.filter(x=>x.time>now-9e5);
+  let mom=0;if(r5.length>1)mom=(r5[r5.length-1].price-r5[0].price)/r5[0].price*100;
+  const mE=document.getElementById('momentum');mE.textContent=(mom>=0?'+':'')+mom.toFixed(3)+'%';mE.style.color=mom>=0?'var(--green)':'var(--red)';
+  const l30=h.slice(-30).map(x=>x.price),mean=l30.reduce((a,b)=>a+b,0)/l30.length;
+  const vol=Math.sqrt(l30.reduce((a,b)=>a+Math.pow(b-mean,2),0)/l30.length)/mean*100;
+  const vE=document.getElementById('volatility');vE.textContent=vol.toFixed(3)+'%';vE.style.color=vol>0.1?'var(--amber)':'var(--text-primary)';
+  let tr=0;if(r15.length>1)tr=(r15[r15.length-1].price-r15[0].price)/r15[0].price*100;
+  const tE=document.getElementById('trend15m');tE.textContent=tr>=0?'▲ BULLISH':'▼ BEARISH';tE.style.color=tr>=0?'var(--green)':'var(--red)';
+  const rp=Math.min(14,h.length-1);let g=0,lo=0;
+  for(let i=h.length-rp;i<h.length;i++){const d=h[i].price-h[i-1].price;if(d>0)g+=d;else lo-=d}
+  const rs=lo===0?100:(g/rp)/(lo/rp),rsi=100-(100/(1+rs));
+  const rE=document.getElementById('rsi14');rE.textContent=rsi.toFixed(1);rE.style.color=rsi>70?'var(--red)':rsi<30?'var(--green)':'var(--amber)';
+  const bias=50+mom*100+(Math.random()-0.5)*5;state.polymarketUp=Math.max(15,Math.min(85,bias)).toFixed(1);state.polymarketDown=(100-state.polymarketUp).toFixed(1);
+  document.getElementById('polyUp').textContent=state.polymarketUp+'%';document.getElementById('polyDown').textContent=state.polymarketDown+'%';
 }
 
-function getCurrentSlot() {
-  const now = new Date();
-  const min = now.getMinutes();
-  const slotMin = min - (min % 5);
-  return `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${now.getHours()}-${slotMin}`;
+// ==================== CHART ====================
+function drawChart(){
+  const cv=document.getElementById('priceChart'),ctx=cv.getContext('2d'),rect=cv.parentElement.getBoundingClientRect();
+  cv.width=rect.width*2;cv.height=rect.height*2;ctx.scale(2,2);const W=rect.width,H=rect.height;
+  const data=state.priceHistory.slice(-120);if(data.length<2)return;ctx.clearRect(0,0,W,H);
+  const prices=data.map(d=>d.price),mn=Math.min(...prices)*0.9999,mx=Math.max(...prices)*1.0001,rng=mx-mn||1;
+  const up=prices[prices.length-1]>=prices[0],col=up?'#00e676':'#ff1744';
+  ctx.beginPath();data.forEach((d,i)=>{const x=(i/(data.length-1))*W,y=H-((d.price-mn)/rng)*H*0.85-H*0.05;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+  ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();
+  const gr=ctx.createLinearGradient(0,0,0,H);gr.addColorStop(0,up?'rgba(0,230,118,0.15)':'rgba(255,23,68,0.15)');gr.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=gr;ctx.fill();
+  const ly=H-((prices[prices.length-1]-mn)/rng)*H*0.85-H*0.05;ctx.beginPath();ctx.arc(W-2,ly,4,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
 }
 
-function updateCountdown() {
-  const remaining = getSecondsUntilNext5Min();
-  const min = Math.floor(remaining / 60);
-  const sec = Math.floor(remaining % 60);
-  document.getElementById('countdown').textContent =
-    `${min}:${sec.toString().padStart(2, '0')}`;
-
-  // Trigger prediction at each new 5-min slot
-  const currentSlot = getCurrentSlot();
-  if (lastPredictionSlot === null) {
-    lastPredictionSlot = currentSlot;
-  } else if (currentSlot !== lastPredictionSlot) {
-    lastPredictionSlot = currentSlot;
-    generateXPosts();
-    generatePrediction();
+// ==================== X SENTIMENT ====================
+const xAuth=['CryptoWhale','BTCAnalyst','ChainlinkGod','DegenTrader','MarketMinds','OnChainWiz','CryptoCapo','WhalePanda','HsakaTrades','CryptoCred','AltcoinSherpa','Pentosh1','TraderXO'];
+const bullP=['BTC breaking through resistance. Next leg up incoming.','Chainlink data showing massive accumulation.','Polymarket 5min favoring UP. Smart money agrees.','Hash rate at ATH. Fundamentals strong.','Short liquidations piling up. Bears getting rekt.','Volume profile suggests breakout.','On-chain metrics screaming bullish.','Spot buying pressure intense.','Macro tailwinds + strong technicals.'];
+const bearP=['BTC showing weakness at key level. Rejection likely.','Funding rates extreme. Leverage flush incoming.','Polymarket DOWN bets increasing.','Whale wallets moving to exchanges.','RSI divergence on 4H. Reversal forming.','Exchange inflows spiking. Distribution phase.','CME gap below needs filling.','Retail euphoria peaking. Top signal.','Volume declining on rallies.'];
+const neutP=['BTC consolidating. Waiting for direction.','Mixed signals across timeframes.','Watching 5min Polymarket resolution.','Need more confirmation.','Range-bound for now.'];
+function genXPosts(){
+  const mom=state.priceHistory.length>10?state.priceHistory[state.priceHistory.length-1].price-state.priceHistory[Math.max(0,state.priceHistory.length-10)].price:0;
+  const posts=[];for(let i=0;i<3+Math.floor(Math.random()*3);i++){
+    const r=Math.random(),b=mom>0?0.15:mom<0?-0.15:0;let s,t;
+    if(r+b>0.6){s='bullish';t=bullP[Math.floor(Math.random()*bullP.length)]}else if(r+b<0.35){s='bearish';t=bearP[Math.floor(Math.random()*bearP.length)]}else{s='neutral';t=neutP[Math.floor(Math.random()*neutP.length)]}
+    posts.push({author:'@'+xAuth[Math.floor(Math.random()*xAuth.length)],text:t,sentiment:s,time:new Date().toLocaleTimeString()});
   }
+  state.xPosts=posts.concat(state.xPosts).slice(0,30);DB.set('xPosts',state.xPosts.slice(0,30));renderXFeed();
+}
+function renderXFeed(){
+  document.getElementById('xFeed').innerHTML=state.xPosts.slice(0,10).map(p=>`<div class="x-item ${p.sentiment}"><div class="x-item-header"><span class="x-item-author">${p.author}</span><span class="x-item-time">${p.time}</span></div><div class="x-item-text">${p.text}</div><span class="x-item-sentiment ${p.sentiment}">${p.sentiment.toUpperCase()}</span></div>`).join('');
+  const bu=state.xPosts.filter(p=>p.sentiment==='bullish').length,be=state.xPosts.filter(p=>p.sentiment==='bearish').length;
+  const sE=document.getElementById('overallSentiment');
+  if(bu>be){sE.textContent='▲ BULLISH';sE.style.color='var(--green)'}else if(be>bu){sE.textContent='▼ BEARISH';sE.style.color='var(--red)'}else{sE.textContent='◆ NEUTRAL';sE.style.color='var(--amber)'}
+  document.getElementById('postsAnalyzed').textContent=state.xPosts.length;
 }
 
-// ============================================================================
-// INITIALIZATION
-// ============================================================================
-async function init() {
-  console.log('ORACLE — Initializing Chainlink BTC/USD feed...');
-
-  // Initialize ethers provider + Chainlink contract
-  initProvider();
-
-  // Decimals are always 8 for BTC/USD — skip the on-chain read
-  chainlinkDecimals = 8;
-
-  // Restore UI from DB IMMEDIATELY so user sees data instantly
-  if (state.currentPrice > 0) {
-    updatePriceUI();
-    updateMarketAnalysis();
-    drawChart();
+// ==================== AI PREDICTION ====================
+function genPrediction(){
+  const h=state.priceHistory;if(h.length<5)return;
+  const r5=h.filter(x=>x.time>Date.now()-3e5);let mom=0;if(r5.length>1)mom=(r5[r5.length-1].price-r5[0].price)/r5[0].price;
+  const rp=Math.min(14,h.length-1);let g=0,lo=0;for(let i=h.length-rp;i<h.length;i++){const d=h[i].price-h[i-1].price;if(d>0)g+=d;else lo-=d}
+  const rs=lo===0?100:(g/rp)/(lo/rp),rsi=100-(100/(1+rs)),rsiSig=rsi>70?-1:rsi<30?1:(50-rsi)/50;
+  const bu=state.xPosts.filter(p=>p.sentiment==='bullish').length,be=state.xPosts.filter(p=>p.sentiment==='bearish').length;
+  const sentScore=state.xPosts.length>0?(bu-be)/state.xPosts.length:0,polyBias=(state.polymarketUp-50)/50;
+  const l20=h.slice(-20).map(x=>x.price),mean=l20.reduce((a,b)=>a+b,0)/l20.length;
+  const vol=Math.sqrt(l20.reduce((a,b)=>a+Math.pow(b-mean,2),0)/l20.length)/mean;
+  const score=(mom*3000)*0.30+rsiSig*0.20+sentScore*0.25+polyBias*0.15+(Math.random()-0.5)*0.10;
+  const dir=score>0.02?'UP':score<-0.02?'DOWN':(Math.random()>0.5?'UP':'DOWN');
+  const conf=Math.min(92,Math.max(35,Math.abs(score)*120+40+Math.random()*15));
+  const factors=[
+    {label:'Price Momentum',value:mom>=0?'Bullish':'Bearish',cls:mom>=0?'bullish':'bearish'},
+    {label:'RSI Signal',value:rsi>70?'Overbought':rsi<30?'Oversold':'Neutral',cls:rsi>70?'bearish':rsi<30?'bullish':'neutral'},
+    {label:'X Sentiment',value:sentScore>0.1?'Bullish':sentScore<-0.1?'Bearish':'Neutral',cls:sentScore>0.1?'bullish':sentScore<-0.1?'bearish':'neutral'},
+    {label:'Polymarket Odds',value:state.polymarketUp+'% UP',cls:state.polymarketUp>55?'bullish':state.polymarketUp<45?'bearish':'neutral'},
+    {label:'Volatility',value:(vol*100).toFixed(3)+'%',cls:vol>0.001?'bearish':'neutral'}];
+  if(state.predictions.length>0&&state.predictions[0].result==='PENDING'){
+    const p=state.predictions[0];p.resultPrice=state.currentPrice;
+    p.result=(state.currentPrice>p.priceAt)===(p.direction==='UP')?'CORRECT':'WRONG';
   }
-  if (state.predictions.length > 0) {
-    updatePredictionUI(state.predictions[0]);
-    updateHistoryUI();
-  }
-  if (state.xPosts.length > 0) {
-    renderXFeed();
-  }
-
-  // Generate initial content if empty
-  if (state.xPosts.length === 0) generateXPosts();
-
-  // Start countdown immediately
-  setInterval(updateCountdown, 1000);
-
-  // Fetch fresh price in background (non-blocking)
-  fetchBTCPrice().then(() => {
-    if (state.predictions.length === 0 && state.currentPrice > 0) generatePrediction();
-  });
-
-  // Price refresh every 1 second from Chainlink
-  setInterval(fetchBTCPrice, 1000);
-
-  // Redraw chart on resize
-  window.addEventListener('resize', drawChart);
+  state.predictions.unshift({id:Date.now(),time:new Date().toLocaleTimeString(),direction:dir,confidence:conf.toFixed(1),priceAt:state.currentPrice,resultPrice:null,result:'PENDING',factors});
+  if(state.predictions.length>200)state.predictions.length=200;DB.set('predictions',state.predictions);
+  updatePredUI(state.predictions[0]);updateHistUI();
+}
+function updatePredUI(p){
+  const d=document.getElementById('predDirection');d.textContent=p.direction==='UP'?'▲ UP':'▼ DOWN';d.className='prediction-direction '+(p.direction==='UP'?'up':'down');
+  document.getElementById('predConfidence').textContent=`Confidence: ${p.confidence}%`;
+  const b=document.getElementById('predConfBar');b.style.width=p.confidence+'%';b.className='confidence-fill '+(p.direction==='UP'?'up':'down');
+  document.getElementById('predFactors').innerHTML=p.factors.map(f=>`<div class="factor"><span class="factor-label">${f.label}</span><span class="factor-value ${f.cls}">${f.value}</span></div>`).join('');
+}
+function updateHistUI(){
+  const p=state.predictions,c=p.filter(x=>x.result==='CORRECT').length,w=p.filter(x=>x.result==='WRONG').length,pe=p.filter(x=>x.result==='PENDING').length;
+  const dec=c+w,acc=dec>0?(c/dec*100):0;
+  document.getElementById('totalPreds').textContent=p.length;document.getElementById('correctPreds').textContent=c;
+  document.getElementById('wrongPreds').textContent=w;document.getElementById('pendingPreds').textContent=pe;
+  document.getElementById('accuracyPct').textContent=acc.toFixed(0)+'%';
+  const ci=document.getElementById('accuracyCircle');ci.style.strokeDashoffset=264-(264*acc/100);ci.style.stroke=acc>=55?'var(--green)':acc>=45?'var(--amber)':'var(--red)';
+  document.getElementById('historyBody').innerHTML=p.slice(0,20).map(x=>`<div class="history-row"><span>${x.time}</span><span style="color:${x.direction==='UP'?'var(--green)':'var(--red)'}">${x.direction==='UP'?'▲ UP':'▼ DOWN'}</span><span>${formatPrice(x.priceAt)}</span><span>${x.resultPrice?formatPrice(x.resultPrice):'---'}</span><span class="result-${x.result.toLowerCase()}">${x.result==='CORRECT'?'✓':x.result==='WRONG'?'✗':'◌'}</span></div>`).join('');
 }
 
-// Wait for DOM
-document.addEventListener('DOMContentLoaded', init);
+// ==================== COUNTDOWN ====================
+let lastSlot=null;
+function getSlot(){const n=new Date();return `${n.getFullYear()}-${n.getMonth()}-${n.getDate()}-${n.getHours()}-${n.getMinutes()-n.getMinutes()%5}`}
+function tickCountdown(){
+  const n=new Date(),rem=300-((n.getMinutes()%5)*60+n.getSeconds());
+  document.getElementById('countdown').textContent=`${Math.floor(rem/60)}:${(Math.floor(rem)%60).toString().padStart(2,'0')}`;
+  const slot=getSlot();if(!lastSlot)lastSlot=slot;else if(slot!==lastSlot){lastSlot=slot;genXPosts();genPrediction()}
+}
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded',()=>{
+  if(state.currentPrice>0)updatePriceUI();
+  if(state.chainlinkPrice>0)document.getElementById('chainlinkPrice').textContent=formatPrice(state.chainlinkPrice);
+  if(state.predictions.length>0){updatePredUI(state.predictions[0]);updateHistUI()}
+  if(state.xPosts.length>0)renderXFeed();else genXPosts();
+  connectWS();
+  fetchChainlink();setInterval(fetchChainlink,60000);
+  setInterval(tickCountdown,1000);
+  setInterval(()=>{updateMarket();drawChart()},2000);
+  setTimeout(()=>{if(state.predictions.length===0&&state.currentPrice>0)genPrediction()},3000);
+  window.addEventListener('resize',drawChart);
+});
 </script>
 </body>
 </html>
