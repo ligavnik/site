@@ -185,26 +185,64 @@
     </div>
     <div id="ml" style="max-height:300px;overflow-y:auto"></div>
 </div>
+
+<!-- AUTO PREDICTION HISTORY -->
+<div class="card" style="padding:18px 20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="st" style="margin:0"><i class="fa-solid fa-robot" style="font-size:9px"></i> AUTO PREDICTION HISTORY</div>
+        <button onclick="cAH()" style="background:transparent;border:1px solid var(--border);color:var(--t3);padding:3px 8px;border-radius:5px;font-size:9px;font-weight:700;font-family:var(--fm);cursor:pointer;transition:all 0.2s">CLEAR</button>
+    </div>
+    <div id="ah" style="max-height:400px;overflow-y:auto"></div>
+</div>
 </div>
 </main>
 
 <script>
 // STATE
-let ch,lp=0,pH=[],cP=null,st={w:0,l:0},snd=true,mB=[],cI='5m';
+let ch,lp=0,pH=[],cP=null,st={w:0,l:0},snd=true,mB=[],cI='5m',aH=[];
 
 // INIT
 (async()=>{
     try{const s=localStorage.getItem('b5s');if(s!==null)snd=JSON.parse(s);uSB()}catch(e){}
     try{const b=localStorage.getItem('b5b4');if(b)mB=JSON.parse(b);rMB()}catch(e){}
+    try{const h=localStorage.getItem('b5h');if(h)aH=JSON.parse(h);rAH()}catch(e){}
     rSt();iC();sCd();
     await fP();
+    // Fetch price every second for live updates
+    setInterval(fLP,1000);
+    // Fetch full history every 5 minutes on the clock
     setInterval(async()=>{
         const n=new Date(),m=n.getMinutes(),s=n.getSeconds();
         if(m%5===0&&s<2){await fP()}
     },2000);
 })();
 
-// FETCH PRICE
+// FETCH LIVE PRICE (every second)
+async function fLP(){
+    try{
+        const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+        const d=await r.json();
+        if(d.price){
+            const np=parseFloat(d.price);
+            if(np!==lp){
+                lp=np;
+                document.getElementById('cp').textContent='$'+N(lp);
+                if(pH.length>0){
+                    const o=pH[pH.length-20]?pH[pH.length-20].p:pH[0].p;
+                    const c=((lp-o)/o)*100;
+                    const ch24=document.getElementById('c24');
+                    ch24.textContent=(c>=0?'+':'')+c.toFixed(2)+'%';
+                    ch24.style.color=c>=0?'var(--bull)':'var(--bear)';
+                }
+                rMyB(lp);
+            }
+        }
+    }catch(e){
+        console.error('Live price fetch error:',e);
+    }
+}
+
+// FETCH PRICE HISTORY (every 5 minutes)
 async function fP(){
     try{
         const r=await fetch('https://min-api.cryptocompare.com/data/v2/histominute?fsym=BTC&tsym=USD&limit=100&aggregate=5');
@@ -314,6 +352,22 @@ function cLP(){
     const a=lp>=cP.sp?'UP':'DOWN',w=cP.dir===a;
     if(w){st.w++;pSnd('w');toast('✅ WIN: '+cP.dir,'w')}else{st.l++;pSnd('lo');toast('❌ LOSS: '+cP.dir,'l')}
     document.getElementById('st').textContent=st.w+st.l;
+    
+    // Save to auto history
+    aH.unshift({
+        id:'A-'+Date.now(),
+        time:new Date(cP.st).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
+        dir:cP.dir,
+        price:cP.sp,
+        target:cP.tp,
+        actual:lp,
+        conf:cP.conf,
+        result:w?'WIN':'LOSS'
+    });
+    if(aH.length>50)aH.pop();
+    localStorage.setItem('b5h',JSON.stringify(aH));
+    rAH();
+    
     uSt();cP=null;localStorage.removeItem('b5p');rPUI();
     document.getElementById('wl').textContent='READY';
     document.getElementById('wl').style.background='var(--s3)';
@@ -387,6 +441,36 @@ function rMB(){
     }).join('');
 }
 function cMB(){if(!mB.length)return;mB=[];localStorage.setItem('b5b4',JSON.stringify(mB));rMB();toast('🗑 Cleared','i')}
+
+// AUTO HISTORY
+function rAH(){
+    const el=document.getElementById('ah');
+    if(!aH.length){el.innerHTML='<div style="text-align:center;color:var(--t3);font-size:10px;margin-top:24px">No auto predictions yet.</div>';return}
+    el.innerHTML=aH.slice(0,50).map(h=>{
+        const dc=h.dir==='UP'?'var(--bull)':'var(--bear)',ic=h.dir==='UP'?'fa-arrow-trend-up':'fa-arrow-trend-down',bg=h.dir==='UP'?'var(--bull-d)':'var(--bear-d)';
+        const ch=((h.actual-h.price)/h.price)*100;
+        let bd='<span class="badge" style="background:var(--bull-d);color:var(--bull)">WIN ✓</span>';
+        if(h.result==='LOSS')bd='<span class="badge" style="background:var(--bear-d);color:var(--bear)">LOSS ✗</span>';
+        return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:8px;background:var(--s2);border:1px solid var(--border);margin-bottom:4px">
+            <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:32px;height:32px;border-radius:8px;background:${bg};display:flex;align-items:center;justify-content:center">
+                    <i class="fa-solid ${ic}" style="font-size:12px;color:${dc}"></i>
+                </div>
+                <div>
+                    <div class="m" style="font-size:11px;color:${dc};font-weight:700">${h.dir} <span style="color:var(--t3);font-weight:400">@ $${N(h.price)}</span></div>
+                    <div class="m" style="font-size:8px;color:var(--t3)">${h.time} • ${h.conf}% conf</div>
+                </div>
+            </div>
+            <div style="text-align:right;display:flex;flex-direction:column;gap:2px;align-items:flex-end">
+                <div class="m" style="font-size:9px;color:var(--t3)">Target: $${N(h.target)}</div>
+                <div class="m" style="font-size:9px;color:var(--t3)">Actual: $${N(h.actual)}</div>
+                <div class="m" style="font-size:10px;font-weight:700;color:${ch>=0?'var(--bull)':'var(--bear)'}">${ch>=0?'+':''}${ch.toFixed(3)}%</div>
+                ${bd}
+            </div>
+        </div>`;
+    }).join('');
+}
+function cAH(){if(!aH.length)return;aH=[];localStorage.setItem('b5h',JSON.stringify(aH));rAH();toast('🗑 History cleared','i')}
 
 // STATE
 function svSt(){if(cP)localStorage.setItem('b5p',JSON.stringify(cP));else localStorage.removeItem('b5p')}
