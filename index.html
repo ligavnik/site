@@ -3,40 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTC5M • Global Oracle</title>
-    
+    <title>BTC5M • Oracle</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>₿</text></svg>">
+
     <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
-    <!-- Tailwind Config for Custom Colors -->
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
+                        sans: ['DM Sans', 'sans-serif'],
+                        mono: ['Space Mono', 'monospace'],
                     },
                     colors: {
-                        glass: 'rgba(24, 24, 27, 0.65)',
-                        glassBorder: 'rgba(255, 255, 255, 0.08)',
-                        poly: '#2D2D2D',
+                        surface: {
+                            0: '#08080a',
+                            1: '#111114',
+                            2: '#18181c',
+                            3: '#222228',
+                        },
+                        accent: '#f59e0b',
+                        bull: '#22c55e',
+                        bear: '#ef4444',
                     },
                     animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'flash-green': 'flashGreen 0.5s ease-out',
-                        'flash-red': 'flashRed 0.5s ease-out',
+                        'flash-green': 'flashGreen 0.6s ease-out',
+                        'flash-red': 'flashRed 0.6s ease-out',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'pulse-ring': 'pulseRing 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+                        'ticker': 'ticker 0.15s ease-out',
                     },
                     keyframes: {
-                        flashGreen: { '0%': { color: '#34d399', transform: 'scale(1.05)' }, '100%': { color: 'inherit', transform: 'scale(1)' } },
-                        flashRed: { '0%': { color: '#f87171', transform: 'scale(1.05)' }, '100%': { color: 'inherit', transform: 'scale(1)' } }
+                        flashGreen: { '0%': { color: '#22c55e', transform: 'scale(1.02)' }, '100%': { color: 'inherit', transform: 'scale(1)' } },
+                        flashRed: { '0%': { color: '#ef4444', transform: 'scale(1.02)' }, '100%': { color: 'inherit', transform: 'scale(1)' } },
+                        slideUp: { '0%': { opacity: 0, transform: 'translateY(12px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } },
+                        fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
+                        pulseRing: { '0%': { transform: 'scale(0.8)', opacity: 1 }, '100%': { transform: 'scale(2.4)', opacity: 0 } },
+                        ticker: { '0%': { transform: 'translateY(-8px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } },
                     }
                 }
             }
@@ -44,139 +57,338 @@
     </script>
 
     <style>
-        body { 
-            background-color: #09090b;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.07) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(249, 115, 22, 0.05) 0px, transparent 50%);
+        :root {
+            --bg: #08080a;
+            --surface-1: #111114;
+            --surface-2: #18181c;
+            --surface-3: #222228;
+            --border: rgba(255,255,255,0.06);
+            --border-hover: rgba(255,255,255,0.12);
+            --text-1: #f4f4f5;
+            --text-2: #a1a1aa;
+            --text-3: #52525b;
+            --bull: #22c55e;
+            --bear: #ef4444;
+            --accent: #f59e0b;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245,158,11,0.06), transparent),
+                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(34,197,94,0.04), transparent);
             background-attachment: fixed;
         }
-        
-        /* Glassmorphism Utilities */
-        .glass-panel {
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glassBorder);
+
+        .card {
+            background: var(--surface-1);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: border-color 0.3s;
+        }
+        .card:hover { border-color: var(--border-hover); }
+
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 10px; }
+
+        .chart-container { position: relative; height: 280px; width: 100%; }
+        @media (max-width: 768px) { .chart-container { height: 200px; } }
+
+        /* Progress ring for countdown */
+        .countdown-ring {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .countdown-ring svg { transform: rotate(-90deg); }
+        .countdown-ring .ring-track { stroke: var(--surface-3); }
+        .countdown-ring .ring-fill { stroke: var(--accent); transition: stroke-dashoffset 1s linear; stroke-linecap: round; }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 16px;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            pointer-events: auto;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1), fadeOut 0.3s ease 3.5s forwards;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(-8px); } }
+
+        .toast.win { background: #14532d; border: 1px solid #166534; color: #86efac; }
+        .toast.loss { background: #450a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
+        .toast.info { background: #1e1b4b; border: 1px solid #312e81; color: #c7d2fe; }
+        .toast.lock { background: #422006; border: 1px solid #713f12; color: #fde68a; }
+
+        /* Stat badge */
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'Space Mono', monospace;
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+        /* Subtle glow on prediction card */
+        .glow-bull { box-shadow: 0 0 60px -20px rgba(34,197,94,0.3), inset 0 1px 0 rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.2) !important; }
+        .glow-bear { box-shadow: 0 0 60px -20px rgba(239,68,68,0.3), inset 0 1px 0 rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2) !important; }
 
-        .chart-container { position: relative; height: 300px; width: 100%; }
-        @media (max-width: 768px) { .chart-container { height: 220px; } }
+        /* Table row enter */
+        .row-enter { animation: slideUp 0.3s ease-out; }
+
+        /* Tab buttons */
+        .tab-btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .tab-btn.active { background: var(--surface-3); color: var(--text-1); border-color: var(--border-hover); }
+        .tab-btn:not(.active) { color: var(--text-3); }
+        .tab-btn:not(.active):hover { color: var(--text-2); background: var(--surface-2); }
+
+        /* Manual bet buttons */
+        .bet-btn {
+            position: relative;
+            overflow: hidden;
+            border-radius: 14px;
+            padding: 16px;
+            font-weight: 700;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1px solid;
+        }
+        .bet-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .bet-btn:hover::before { opacity: 1; }
+        .bet-btn:active { transform: scale(0.97); }
+
+        .bet-btn.up {
+            background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(34,197,94,0.04));
+            border-color: rgba(34,197,94,0.2);
+            color: #86efac;
+        }
+        .bet-btn.up::before { background: rgba(34,197,94,0.08); }
+        .bet-btn.up:hover { border-color: rgba(34,197,94,0.4); }
+
+        .bet-btn.down {
+            background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(239,68,68,0.04));
+            border-color: rgba(239,68,68,0.2);
+            color: #fca5a5;
+        }
+        .bet-btn.down::before { background: rgba(239,68,68,0.08); }
+        .bet-btn.down:hover { border-color: rgba(239,68,68,0.4); }
     </style>
 </head>
 <body class="text-zinc-200 antialiased min-h-screen flex flex-col">
 
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
     <!-- Header -->
-    <header class="sticky top-0 z-50 glass-panel border-b border-white/5">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+    <header class="sticky top-0 z-50 bg-surface-0/80 backdrop-blur-xl border-b border-white/[0.06]">
+        <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-lg flex items-center justify-center shadow-lg shadow-orange-500/20">
-                    <i class="fa-brands fa-bitcoin text-white text-lg md:text-xl"></i>
+                <div class="w-9 h-9 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
+                    <i class="fa-brands fa-bitcoin text-white text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg md:text-xl leading-none tracking-tight">BTC<span class="text-emerald-400">5M</span></h1>
-                    <div class="flex items-center gap-2 text-[10px] md:text-xs text-zinc-400 font-mono">
-                        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>LIVE</span>
-                        <span class="text-zinc-600">|</span>
-                        <span>ORACLE</span>
+                    <h1 class="font-bold text-base leading-none tracking-tight">BTC<span class="text-amber-400">5M</span></h1>
+                    <div class="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono mt-0.5">
+                        <span id="feed-label" class="uppercase">Oracle</span>
                     </div>
                 </div>
             </div>
-            
-            <div class="flex items-center gap-3">
-                <div id="connection-status" class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
-                    <i class="fa-solid fa-link"></i> Connected
+
+            <div class="flex items-center gap-2.5">
+                <div id="connection-status" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-zinc-800 text-zinc-500 border border-zinc-700/50">
+                    <span class="relative flex h-2 w-2">
+                        <span id="conn-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-500 opacity-50"></span>
+                        <span id="conn-dot" class="relative inline-flex rounded-full h-2 w-2 bg-zinc-500"></span>
+                    </span>
+                    <span id="conn-text">Connecting</span>
                 </div>
-                <a href="https://polymarket.com/crypto/5M" target="_blank" 
-                   class="bg-zinc-100 hover:bg-white text-zinc-900 px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-white/5">
-                    Bet <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i>
+
+                <!-- Sound toggle -->
+                <button id="sound-toggle" onclick="toggleSound()" class="w-8 h-8 rounded-lg bg-surface-2 border border-white/[0.06] flex items-center justify-center text-zinc-500 hover:text-zinc-300 transition-colors text-xs" title="Toggle sound">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+
+                <a href="https://polymarket.com" target="_blank"
+                   class="bg-zinc-100 hover:bg-white text-zinc-900 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-[1.03] active:scale-95 shadow-lg shadow-white/5">
+                    Polymarket <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[9px] opacity-50"></i>
                 </a>
             </div>
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 space-y-6">
+    <main class="flex-1 max-w-7xl mx-auto w-full p-3 md:p-6 space-y-4 md:space-y-5">
 
-        <!-- Top Section: Price & Timer -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
+        <!-- Stats Bar -->
+        <div class="flex flex-wrap gap-2 items-center">
+            <div class="stat-badge bg-surface-2 text-zinc-400 border border-white/[0.06]">
+                <i class="fa-solid fa-chart-line text-amber-400"></i>
+                <span>W/L:</span>
+                <span id="stat-wl" class="text-zinc-200">0 / 0</span>
+            </div>
+            <div class="stat-badge bg-surface-2 text-zinc-400 border border-white/[0.06]">
+                <i class="fa-solid fa-percent text-emerald-400"></i>
+                <span>Rate:</span>
+                <span id="stat-rate" class="text-zinc-200">--%</span>
+            </div>
+            <div class="stat-badge bg-surface-2 text-zinc-400 border border-white/[0.06]">
+                <i class="fa-solid fa-fire text-orange-400"></i>
+                <span>Streak:</span>
+                <span id="stat-streak" class="text-zinc-200">0</span>
+            </div>
+            <div class="stat-badge bg-surface-2 text-zinc-400 border border-white/[0.06]">
+                <span>24h Vol:</span>
+                <span id="stat-vol" class="text-zinc-200">--</span>
+            </div>
+        </div>
+
+        <!-- Top: Price + Countdown + Prediction -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5">
+
             <!-- Price Card -->
-            <div class="lg:col-span-8 glass-panel rounded-2xl p-6 md:p-8 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <i class="fa-brands fa-bitcoin text-9xl"></i>
+            <div class="lg:col-span-5 card p-5 md:p-6 relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 opacity-[0.03]">
+                    <i class="fa-brands fa-bitcoin text-[180px]"></i>
                 </div>
-                
-                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
-                    <div>
-                        <div class="text-sm font-medium text-zinc-400 mb-2 flex items-center gap-2">
-                            BTC / USD (Chainlink)
-                        </div>
-                        <div id="live-price" class="text-5xl md:text-7xl font-bold font-mono tracking-tighter text-white transition-colors duration-300">
-                            Connecting...
-                        </div>
-                        <div id="price-change-pill" class="inline-flex items-center gap-1 mt-3 px-2 py-1 rounded bg-zinc-800/50 border border-white/5 text-sm font-mono text-zinc-400">
-                            Waiting for tick...
-                        </div>
+
+                <div class="relative z-10">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-xs font-bold text-zinc-500 uppercase tracking-wider">BTC / USD</span>
+                        <span id="price-source" class="text-[10px] px-1.5 py-0.5 rounded bg-surface-3 text-zinc-500 font-mono">--</span>
                     </div>
 
-                    <div class="text-left md:text-right bg-zinc-900/50 md:bg-transparent p-4 md:p-0 rounded-xl md:rounded-none border border-white/5 md:border-none">
-                        <div class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Window Closes In</div>
-                        <div id="countdown" class="text-4xl md:text-6xl font-mono font-bold text-orange-400 tabular-nums">
-                            --:--
+                    <div id="live-price" class="text-4xl md:text-5xl font-bold font-mono tracking-tighter text-white transition-colors duration-300 leading-none">
+                        $--,---.--
+                    </div>
+
+                    <div class="flex items-center gap-2 mt-3">
+                        <span id="price-change-pill" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-3 text-xs font-mono text-zinc-500">
+                            Waiting...
+                        </span>
+                        <span id="price-24h" class="text-[10px] font-mono text-zinc-600">24h: --</span>
+                    </div>
+
+                    <!-- High/Low of session -->
+                    <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/[0.04]">
+                        <div>
+                            <div class="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Session High</div>
+                            <div id="session-high" class="text-sm font-mono text-emerald-400/80 mt-0.5">--</div>
                         </div>
-                        <div class="text-xs text-zinc-500 mt-1 font-mono" id="window-range">
-                            --:-- to --:--
+                        <div>
+                            <div class="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Session Low</div>
+                            <div id="session-low" class="text-sm font-mono text-red-400/80 mt-0.5">--</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Current Prediction Card -->
-            <div class="lg:col-span-4 glass-panel rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-zinc-950/50"></div>
-                
+            <!-- Countdown Card -->
+            <div class="lg:col-span-3 card p-5 md:p-6 flex flex-col items-center justify-center text-center">
+                <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Window Closes</div>
+
+                <div class="countdown-ring mb-3">
+                    <svg width="120" height="120" viewBox="0 0 120 120">
+                        <circle class="ring-track" cx="60" cy="60" r="52" fill="none" stroke-width="6"/>
+                        <circle id="countdown-ring-fill" class="ring-fill" cx="60" cy="60" r="52" fill="none" stroke-width="6"
+                            stroke-dasharray="326.73" stroke-dashoffset="0"/>
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div id="countdown" class="text-3xl font-mono font-bold text-amber-400 tabular-nums">--:--</div>
+                    </div>
+                </div>
+
+                <div id="window-range" class="text-[11px] text-zinc-500 font-mono">--:-- → --:--</div>
+                <div id="window-label" class="text-[10px] mt-1.5 px-2 py-0.5 rounded bg-surface-3 text-zinc-600 font-bold uppercase tracking-wider">Waiting</div>
+            </div>
+
+            <!-- Prediction Card -->
+            <div id="prediction-card" class="lg:col-span-4 card p-5 md:p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-700">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-surface-0/60"></div>
+
                 <div class="relative z-10">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-sm font-bold text-zinc-400 uppercase tracking-wider"><i class="fa-solid fa-robot mr-2"></i>AI Call</h2>
-                        <span id="call-status" class="text-xs px-2 py-1 rounded bg-zinc-800 text-zinc-500 border border-zinc-700">WAITING</span>
+                    <div class="flex items-center justify-between mb-5">
+                        <h2 class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-bolt text-amber-400"></i> Oracle Call
+                        </h2>
+                        <span id="call-status" class="text-[10px] px-2 py-0.5 rounded-md bg-surface-3 text-zinc-500 font-bold uppercase tracking-wider border border-white/[0.04]">Waiting</span>
                     </div>
 
-                    <div class="flex items-center gap-4 mb-2">
-                        <div id="prediction-icon" class="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center text-3xl text-zinc-600 transition-all duration-500">
-                            <i class="fa-solid fa-minus"></i>
+                    <div class="flex items-center gap-4">
+                        <div id="prediction-icon" class="w-14 h-14 rounded-2xl bg-surface-3 flex items-center justify-center text-2xl text-zinc-600 transition-all duration-500 shrink-0">
+                            <i class="fa-solid fa-hourglass"></i>
                         </div>
                         <div>
-                            <div id="prediction-text" class="text-3xl font-black italic tracking-tighter text-zinc-600">NEUTRAL</div>
-                            <div id="confidence-text" class="text-sm font-mono text-zinc-500">Conf: --%</div>
+                            <div id="prediction-text" class="text-3xl font-black italic tracking-tight text-zinc-600 leading-none">WAIT</div>
+                            <div id="confidence-text" class="text-xs font-mono text-zinc-500 mt-1">Confidence: --%</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="relative z-10 mt-6 pt-6 border-t border-white/5">
-                    <div class="flex justify-between text-xs text-zinc-400 font-mono mb-1">
-                        <span>Strike Price</span>
-                        <span id="strike-price" class="text-white">—</span>
+                <div class="relative z-10 mt-5 pt-4 border-t border-white/[0.04] space-y-2">
+                    <div class="flex justify-between text-[11px] text-zinc-500 font-mono">
+                        <span>Strike</span>
+                        <span id="strike-price" class="text-zinc-300">—</span>
                     </div>
-                    <div class="flex justify-between text-xs text-zinc-400 font-mono">
+                    <div class="flex justify-between text-[11px] text-zinc-500 font-mono">
                         <span>Momentum</span>
-                        <span id="momentum-val" class="text-white">—</span>
+                        <span id="momentum-val" class="text-zinc-300">—</span>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-zinc-500 font-mono">
+                        <span>Volatility</span>
+                        <span id="volatility-val" class="text-zinc-300">—</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Middle Section: Chart -->
-        <div class="glass-panel rounded-2xl p-1 md:p-6">
-            <div class="flex items-center justify-between px-4 pt-4 md:px-0 md:pt-0 mb-4">
-                <h3 class="font-semibold text-zinc-300">Live Trend (1M)</h3>
-                <div class="flex gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <!-- Chart -->
+        <div class="card p-1 md:p-5">
+            <div class="flex items-center justify-between px-4 pt-3 md:px-0 md:pt-0 mb-3">
+                <h3 class="text-sm font-semibold text-zinc-400 flex items-center gap-2">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-40"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    Live Feed
+                </h3>
+                <div class="flex items-center gap-1.5">
+                    <button onclick="setChartRange(60)" class="tab-btn active" data-range="60">1m</button>
+                    <button onclick="setChartRange(180)" class="tab-btn" data-range="180">3m</button>
+                    <button onclick="setChartRange(300)" class="tab-btn" data-range="300">5m</button>
                 </div>
             </div>
             <div class="chart-container">
@@ -184,510 +396,1000 @@
             </div>
         </div>
 
-        <!-- Bottom Section: History & Manual Bet -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
-            <!-- Global History (Supabase) -->
-            <div class="glass-panel rounded-2xl p-0 overflow-hidden flex flex-col h-[400px]">
-                <div class="p-5 border-b border-white/5 bg-zinc-900/30 flex justify-between items-center">
-                    <h3 class="font-semibold text-zinc-300 flex items-center gap-2">
-                        <i class="fa-solid fa-clock-rotate-left text-zinc-500"></i> Global History
+        <!-- Bottom: History + Manual Bet -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
+
+            <!-- Global History -->
+            <div class="card overflow-hidden flex flex-col h-[420px]">
+                <div class="p-4 border-b border-white/[0.04] flex justify-between items-center shrink-0">
+                    <h3 class="text-sm font-semibold text-zinc-400 flex items-center gap-2">
+                        <i class="fa-solid fa-globe text-indigo-400 text-xs"></i> Global History
                     </h3>
-                    <span class="text-[10px] uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-1 rounded">Syncing Cloud</span>
+                    <span id="supabase-status" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Syncing</span>
                 </div>
-                
-                <div class="overflow-y-auto flex-1 p-0" id="history-container">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-zinc-500 uppercase bg-zinc-950/50 sticky top-0 backdrop-blur-md">
+
+                <div class="overflow-y-auto flex-1" id="history-container">
+                    <table class="w-full text-xs text-left">
+                        <thead class="text-[10px] text-zinc-600 uppercase bg-surface-0/80 sticky top-0 backdrop-blur-md z-10">
                             <tr>
-                                <th class="px-5 py-3 font-medium">Time (UTC)</th>
-                                <th class="px-5 py-3 font-medium">Call</th>
-                                <th class="px-5 py-3 font-medium">Strike</th>
-                                <th class="px-5 py-3 font-medium text-right">Result</th>
+                                <th class="px-4 py-2.5 font-medium">Time</th>
+                                <th class="px-4 py-2.5 font-medium">Call</th>
+                                <th class="px-4 py-2.5 font-medium">Strike</th>
+                                <th class="px-4 py-2.5 font-medium">Close</th>
+                                <th class="px-4 py-2.5 font-medium text-right">Result</th>
                             </tr>
                         </thead>
-                        <tbody id="history-body" class="divide-y divide-zinc-800/50">
-                            <!-- Rows injected by JS -->
-                            <tr><td colspan="4" class="px-5 py-8 text-center text-zinc-600 italic">Connecting to global feed...</td></tr>
+                        <tbody id="history-body">
+                            <tr><td colspan="5" class="px-4 py-10 text-center text-zinc-600 italic text-xs">Connecting to global feed...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Manual Tracker -->
-            <div class="glass-panel rounded-2xl p-6 flex flex-col h-[400px]">
-                <h3 class="font-semibold text-zinc-300 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-gamepad text-zinc-500"></i> Manual Simulator
-                </h3>
-                
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <button onclick="placeManualBet('UP')" class="group relative overflow-hidden bg-gradient-to-br from-emerald-900/40 to-emerald-900/10 border border-emerald-500/20 hover:border-emerald-500/50 rounded-xl p-4 transition-all hover:scale-[1.02] active:scale-95">
-                        <div class="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <div class="text-emerald-400 font-bold text-xl mb-1">UP <i class="fa-solid fa-arrow-trend-up text-sm opacity-50"></i></div>
-                        <div class="text-xs text-emerald-300/60">Predict Higher</div>
-                    </button>
-                    <button onclick="placeManualBet('DOWN')" class="group relative overflow-hidden bg-gradient-to-br from-red-900/40 to-red-900/10 border border-red-500/20 hover:border-red-500/50 rounded-xl p-4 transition-all hover:scale-[1.02] active:scale-95">
-                        <div class="absolute inset-0 bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <div class="text-red-400 font-bold text-xl mb-1">DOWN <i class="fa-solid fa-arrow-trend-down text-sm opacity-50"></i></div>
-                        <div class="text-xs text-red-300/60">Predict Lower</div>
-                    </button>
-                </div>
-
-                <div class="flex-1 overflow-y-auto pr-2">
-                    <div id="manual-log" class="space-y-2">
-                        <!-- Manual bets go here -->
-                        <div class="text-center text-zinc-600 text-sm mt-10">Place a manual bet to track performance locally.</div>
+            <div class="card p-5 flex flex-col h-[420px]">
+                <div class="flex items-center justify-between mb-4 shrink-0">
+                    <h3 class="text-sm font-semibold text-zinc-400 flex items-center gap-2">
+                        <i class="fa-solid fa-crosshairs text-amber-400 text-xs"></i> Your Calls
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <span id="manual-score" class="text-[10px] font-mono font-bold text-zinc-500">0W / 0L</span>
+                        <button onclick="clearManualBets()" class="text-[10px] text-zinc-600 hover:text-zinc-400 transition-colors px-2 py-0.5 rounded bg-surface-3" title="Clear all">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
                     </div>
                 </div>
-            </div>
 
+                <div class="grid grid-cols-2 gap-3 mb-4 shrink-0">
+                    <button onclick="placeManualBet('UP')" class="bet-btn up">
+                        <div class="text-lg mb-0.5"><i class="fa-solid fa-arrow-trend-up mr-2 text-sm"></i>LONG</div>
+                        <div class="text-[10px] opacity-50 font-normal">Predict Higher</div>
+                    </button>
+                    <button onclick="placeManualBet('DOWN')" class="bet-btn down">
+                        <div class="text-lg mb-0.5"><i class="fa-solid fa-arrow-trend-down mr-2 text-sm"></i>SHORT</div>
+                        <div class="text-[10px] opacity-50 font-normal">Predict Lower</div>
+                    </button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto space-y-1.5 pr-1" id="manual-log">
+                    <div class="text-center text-zinc-600 text-xs mt-8">Place a call to start tracking.</div>
+                </div>
+            </div>
         </div>
 
-        <footer class="text-center pt-8 pb-4 text-zinc-600 text-xs font-mono">
-            <p>Data provided by Chainlink Oracle • Synced via Polymarket WS</p>
-            <p class="mt-1 opacity-50">Disclaimer: For research/entertainment purposes only.</p>
+        <footer class="text-center pt-6 pb-4 text-zinc-600 text-[10px] font-mono space-y-1">
+            <p>Price via Binance Stream • History synced via Supabase Realtime</p>
+            <p class="opacity-40">For research & entertainment only. Not financial advice.</p>
         </footer>
-
     </main>
 
-    <!-- SETUP INSTRUCTIONS MODAL (Visible only if keys are missing) -->
+    <!-- Setup Modal -->
     <div id="setup-modal" class="hidden fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl">
-            <h2 class="text-xl font-bold text-white mb-4">Supabase Setup Required</h2>
-            <p class="text-zinc-400 text-sm mb-4">To enable Global History, please edit the HTML file and insert your Supabase URL and Anon Key.</p>
-            <div class="bg-black rounded-lg p-4 text-xs font-mono text-zinc-300 overflow-x-auto mb-4 border border-zinc-800">
-                <p class="text-emerald-400">-- Run this SQL in your Supabase SQL Editor:</p>
-                <code class="block mt-2 text-zinc-400">
--- (SQL Provided in previous version)
-                </code>
+        <div class="bg-surface-1 border border-white/[0.08] rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+            <h2 class="text-lg font-bold text-white mb-3">Supabase Setup Required</h2>
+            <p class="text-zinc-400 text-sm mb-4">To enable Global History, edit the HTML and insert your Supabase URL + Anon Key in the config section.</p>
+            <div class="bg-surface-0 rounded-lg p-4 text-[11px] font-mono text-zinc-400 overflow-x-auto mb-4 border border-white/[0.04]">
+<pre class="text-emerald-400/80">-- Run this SQL in Supabase SQL Editor:
+
+CREATE TABLE btc_5m_calls (
+  id TEXT PRIMARY KEY,
+  window_time TIMESTAMPTZ NOT NULL,
+  start_price NUMERIC NOT NULL,
+  end_price NUMERIC,
+  direction TEXT NOT NULL,
+  confidence INTEGER,
+  result TEXT DEFAULT 'PENDING',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE btc_5m_calls ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all" ON btc_5m_calls
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- Enable Realtime
+ALTER PUBLICATION supabase_realtime
+  ADD TABLE btc_5m_calls;</pre>
             </div>
-            <button onclick="document.getElementById('setup-modal').style.display='none'" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-zinc-200">Close & Use Local Only</button>
+            <button onclick="document.getElementById('setup-modal').classList.add('hidden')"
+                class="w-full bg-white text-black font-bold py-2.5 rounded-xl hover:bg-zinc-200 text-sm transition-colors">
+                Close & Use Local Only
+            </button>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // CONFIGURATION
-        // ==========================================
-        const SUPABASE_URL = 'https://zbugvtypukklxpvrzxra.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpidWd2dHlwdWtrbHhwdnJ6eHJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MjMwNzgsImV4cCI6MjA4NTk5OTA3OH0.aHYE5M0NOsxqJakcKmKTi2MfaxZbPhmMsiz9Hi6zQMc';
-        // ==========================================
+    // ====================================================================
+    // CONFIG
+    // ====================================================================
+    const SUPABASE_URL = 'https://zbugvtypukklxpvrzxra.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpidWd2dHlwdWtrbHhwdnJ6eHJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MjMwNzgsImV4cCI6MjA4NTk5OTA3OH0.aHYE5M0NOsxqJakcKmKTi2MfaxZbPhmMsiz9Hi6zQMc';
 
-        let supabase = null;
-        let ws, chart;
-        let lastPrice = 0;
-        let lastTickTime = 0;
-        let chartDataPoints = []; 
-        let currentWindow = null;
-        let currentPrediction = null; // { dir, conf, startPrice }
-        let manualBets = JSON.parse(localStorage.getItem('btc5m_manual_v2')) || [];
+    // ====================================================================
+    // STATE
+    // ====================================================================
+    let supabaseClient = null;
+    let ws = null;
+    let chart = null;
+    let lastPrice = 0;
+    let prevPrice = 0;
+    let lastTickTime = 0;
+    let sessionHigh = 0;
+    let sessionLow = Infinity;
+    let chartDataPoints = [];
+    let chartRange = 60; // seconds to show
+    let currentPrediction = null;
+    let soundEnabled = JSON.parse(localStorage.getItem('btc5m_sound') ?? 'true');
+    let manualBets = JSON.parse(localStorage.getItem('btc5m_manual_v3') ?? '[]');
+    let stats = JSON.parse(localStorage.getItem('btc5m_stats') ?? '{"wins":0,"losses":0,"streak":0,"streakType":""}');
+    let priceHistory24h = { open: 0 }; // for 24h change calc
+    let reconnectAttempts = 0;
+    const MAX_CHART_POINTS = 600; // 10 min of data at ~1/s
 
-        // Check Setup
+    // ====================================================================
+    // INIT
+    // ====================================================================
+    window.onload = () => {
+        initChart();
+        initSupabase();
+        connectPriceFeed();
+        startTimer();
+        renderManualBets();
+        updateStatsUI();
+        updateSoundIcon();
+        restoreLocalState();
+    };
+
+    // ====================================================================
+    // SUPABASE
+    // ====================================================================
+    function initSupabase() {
         if (!SUPABASE_URL.includes('YOUR_') && !SUPABASE_KEY.includes('YOUR_')) {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            subscribeToGlobalHistory();
-            fetchGlobalHistory();
+            try {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                subscribeToGlobalHistory();
+                fetchGlobalHistory();
+                setEl('supabase-status', 'Live', 'text-[10px] uppercase font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20');
+            } catch (e) {
+                console.error('Supabase init error:', e);
+                setEl('supabase-status', 'Error', 'text-[10px] uppercase font-bold px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20');
+            }
         } else {
             document.getElementById('setup-modal').classList.remove('hidden');
+            setEl('supabase-status', 'Offline', 'text-[10px] uppercase font-bold px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-500 border border-zinc-700');
         }
+    }
 
-        // --- CHART JS SETUP ---
-        function initChart() {
-            const ctx = document.getElementById('priceChart').getContext('2d');
-            
-            // Gradient
-            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
-            gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+    async function saveToSupabase(data) {
+        if (!supabaseClient) return;
+        try {
+            const { error } = await supabaseClient.from('btc_5m_calls').upsert([data], { onConflict: 'id' });
+            if (error) console.error('Supabase save error:', error);
+            else console.log('✅ Saved to global history');
+        } catch (e) {
+            console.error('Supabase save exception:', e);
+        }
+    }
 
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'BTC/USD',
-                        data: [],
-                        borderColor: '#10b981',
-                        backgroundColor: gradient,
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        pointHoverRadius: 4,
-                        fill: true,
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { intersect: false, mode: 'index' },
-                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
-                    scales: {
-                        x: { display: false },
-                        y: { 
-                            position: 'right',
-                            border: { display: false },
-                            grid: { color: '#27272a' },
-                            ticks: { color: '#71717a', font: { family: 'JetBrains Mono', size: 10 } }
-                        }
-                    },
-                    animation: false
+    function subscribeToGlobalHistory() {
+        if (!supabaseClient) return;
+        supabaseClient
+            .channel('btc-5m-realtime')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'btc_5m_calls' }, payload => {
+                if (payload.eventType === 'INSERT') {
+                    renderHistoryRow(payload.new, true);
+                } else if (payload.eventType === 'UPDATE') {
+                    updateHistoryRow(payload.new);
                 }
+            })
+            .subscribe((status) => {
+                console.log('Supabase realtime status:', status);
             });
-        }
+    }
 
-        // --- PERSISTENCE: STATE MANAGER ---
-        function saveLocalState() {
-            if (currentPrediction) {
-                localStorage.setItem('btc5m_active_prediction', JSON.stringify(currentPrediction));
-            } else {
-                localStorage.removeItem('btc5m_active_prediction');
+    async function fetchGlobalHistory() {
+        if (!supabaseClient) return;
+        try {
+            const { data, error } = await supabaseClient
+                .from('btc_5m_calls')
+                .select('*')
+                .order('window_time', { ascending: false })
+                .limit(30);
+
+            if (error) { console.error('Fetch history error:', error); return; }
+            if (data && data.length > 0) {
+                document.getElementById('history-body').innerHTML = '';
+                data.forEach(row => renderHistoryRow(row, false));
+
+                // Calculate stats from history
+                let w = 0, l = 0;
+                data.forEach(r => { if (r.result === 'WIN') w++; else if (r.result === 'LOSS') l++; });
+                stats.wins = w; stats.losses = l;
+                updateStatsUI();
             }
+        } catch (e) {
+            console.error('Fetch history exception:', e);
         }
+    }
 
-        function restoreLocalState() {
-            const saved = localStorage.getItem('btc5m_active_prediction');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    const now = Date.now();
-                    const winStart = new Date(parsed.startTime);
-                    const winEnd = new Date(winStart.getTime() + 5 * 60 * 1000);
+    function renderHistoryRow(row, animate) {
+        const container = document.getElementById('history-body');
+        // Remove placeholder
+        const placeholder = container.querySelector('td[colspan]');
+        if (placeholder) placeholder.parentElement.remove();
 
-                    if (now < winEnd.getTime()) {
-                        currentPrediction = parsed;
-                        updatePredictionUI(currentPrediction);
-                        console.log("State Restored: Prediction Active");
-                    } else {
-                        // Expired while offline
-                        console.log("State Restored: Prediction Expired");
-                        localStorage.removeItem('btc5m_active_prediction');
-                    }
-                } catch (e) {
-                    console.error("State restore failed", e);
-                }
-            }
-        }
+        const tr = document.createElement('tr');
+        tr.className = `border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors ${animate ? 'row-enter' : ''}`;
+        tr.setAttribute('data-id', row.id);
 
-        // --- POLYMARKET / CHAINLINK WS CONNECTION ---
-        function connect() {
-            console.log("Connecting to WS...");
-            ws = new WebSocket('wss://ws-live-data.polymarket.com');
-            
+        const time = new Date(row.window_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const dirColor = row.direction === 'UP' ? 'text-emerald-400' : (row.direction === 'DOWN' ? 'text-red-400' : 'text-zinc-400');
+        const dirIcon = row.direction === 'UP' ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+
+        let resHTML = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-surface-3 text-zinc-500">PENDING</span>';
+        if (row.result === 'WIN') resHTML = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">WIN</span>';
+        else if (row.result === 'LOSS') resHTML = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-500/15 text-red-400 border border-red-500/20">LOSS</span>';
+        else if (row.result === 'PUSH') resHTML = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/20">PUSH</span>';
+
+        const endPrice = row.end_price ? '$' + Number(row.end_price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
+
+        tr.innerHTML = `
+            <td class="px-4 py-3 font-mono text-zinc-500">${time}</td>
+            <td class="px-4 py-3 font-bold ${dirColor}"><i class="fa-solid ${dirIcon} text-[10px] mr-1"></i>${row.direction} <span class="text-[10px] font-normal opacity-40 ml-0.5">${row.confidence || '--'}%</span></td>
+            <td class="px-4 py-3 font-mono text-zinc-400">$${Number(row.start_price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            <td class="px-4 py-3 font-mono text-zinc-400">${endPrice}</td>
+            <td class="px-4 py-3 text-right">${resHTML}</td>
+        `;
+
+        container.insertBefore(tr, container.firstChild);
+        while (container.children.length > 30) container.removeChild(container.lastChild);
+    }
+
+    function updateHistoryRow(row) {
+        const tr = document.querySelector(`tr[data-id="${row.id}"]`);
+        if (!tr) { renderHistoryRow(row, true); return; }
+        // Re-render the row content
+        const temp = document.createElement('tbody');
+        renderHistoryRow.call(null, row, false);
+    }
+
+    // ====================================================================
+    // PRICE FEED — Binance WS (primary) + REST fallback
+    // ====================================================================
+    function connectPriceFeed() {
+        console.log('Connecting to Binance WS...');
+        updateConnectionStatus('connecting');
+
+        try {
+            ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
+
             ws.onopen = () => {
-                console.log("WS Open");
-                document.getElementById('connection-status').innerHTML = '<i class="fa-solid fa-link"></i> Connected';
-                document.getElementById('connection-status').className = 'flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono';
-                
-                // Keep-alive heartbeat
-                ws.send(JSON.stringify({
-                    action: "subscribe",
-                    subscriptions: [{ topic: "crypto_prices_chainlink", type: "*", filters: "{\"symbol\":\"btc/usd\"}" }]
-                }));
+                console.log('✅ Binance WS connected');
+                reconnectAttempts = 0;
+                updateConnectionStatus('connected');
+                document.getElementById('price-source').textContent = 'Binance';
+                document.getElementById('feed-label').textContent = 'Binance Stream';
             };
 
             ws.onmessage = (e) => {
                 try {
                     const msg = JSON.parse(e.data);
-                    // Polymarket WS structure varies, handle standard events
-                    if (msg.topic === "crypto_prices_chainlink" && msg.payload) {
-                        // Check if payload is array or object (sometimes varies)
-                        const pData = Array.isArray(msg.payload) ? msg.payload[0] : msg.payload;
-                        if (pData.symbol && pData.symbol.toLowerCase() === "btc/usd") {
-                            const price = parseFloat(pData.value);
-                            handlePriceUpdate(price);
-                        }
-                    } 
-                    // Fallback for different message structure
-                    else if (msg.event === "price_change" && msg.asset_id) {
-                         // Some other format handling if needed
+                    if (msg.p) {
+                        const price = parseFloat(msg.p);
+                        if (price > 0) handlePriceUpdate(price);
                     }
-                } catch (err) { console.error("WS Parse Error:", err); }
+                } catch (err) {
+                    console.error('WS parse error:', err);
+                }
             };
 
-            ws.onclose = () => {
-                console.log("WS Closed");
-                document.getElementById('connection-status').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Reconnecting';
-                document.getElementById('connection-status').className = 'flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-mono';
-                setTimeout(connect, 3000);
+            ws.onclose = (e) => {
+                console.log('WS closed:', e.code, e.reason);
+                updateConnectionStatus('reconnecting');
+                reconnectAttempts++;
+                const delay = Math.min(3000 * Math.pow(1.5, reconnectAttempts), 30000);
+                console.log(`Reconnecting in ${(delay/1000).toFixed(1)}s...`);
+                setTimeout(connectPriceFeed, delay);
             };
 
             ws.onerror = (err) => {
-                console.error("WS Error:", err);
-            };
-        }
-
-        // Watchdog for frozen connection
-        setInterval(() => {
-            if (Date.now() - lastTickTime > 8000 && lastTickTime > 0) {
-                console.log("Watchdog: Connection frozen, reconnecting...");
-                if(ws) ws.close();
-            }
-        }, 5000);
-
-        function handlePriceUpdate(price) {
-            const now = Date.now();
-            lastTickTime = now;
-            
-            // Visual Updates
-            const el = document.getElementById('live-price');
-            const prev = lastPrice;
-            lastPrice = price;
-            
-            el.textContent = '$' + price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            
-            // Color flash
-            if (prev > 0) {
-                if (price > prev) {
-                    el.classList.remove('animate-flash-red');
-                    el.classList.add('animate-flash-green');
-                    document.getElementById('price-change-pill').textContent = `+${(price-prev).toFixed(2)}`;
-                    document.getElementById('price-change-pill').className = "inline-flex items-center gap-1 mt-3 px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-sm font-mono text-emerald-400";
-                } else if (price < prev) {
-                    el.classList.remove('animate-flash-green');
-                    el.classList.add('animate-flash-red');
-                    document.getElementById('price-change-pill').textContent = `${(price-prev).toFixed(2)}`;
-                    document.getElementById('price-change-pill').className = "inline-flex items-center gap-1 mt-3 px-2 py-1 rounded bg-red-500/10 border border-red-500/20 text-sm font-mono text-red-400";
+                console.error('WS error:', err);
+                // Try Polymarket as fallback
+                if (reconnectAttempts > 2) {
+                    connectPolymarketFallback();
                 }
-                setTimeout(() => el.classList.remove('animate-flash-green', 'animate-flash-red'), 500);
-            }
+            };
+        } catch (e) {
+            console.error('WS connection failed:', e);
+            updateConnectionStatus('error');
+            setTimeout(connectPriceFeed, 5000);
+        }
+    }
 
-            // Chart Data
+    function connectPolymarketFallback() {
+        console.log('Trying Polymarket WS fallback...');
+        try {
+            const polyWs = new WebSocket('wss://ws-live-data.polymarket.com');
+            polyWs.onopen = () => {
+                polyWs.send(JSON.stringify({
+                    action: "subscribe",
+                    subscriptions: [{ topic: "crypto_prices_chainlink", type: "*", filters: '{"symbol":"btc/usd"}' }]
+                }));
+                document.getElementById('price-source').textContent = 'Chainlink';
+                document.getElementById('feed-label').textContent = 'Chainlink Oracle';
+            };
+            polyWs.onmessage = (e) => {
+                try {
+                    const msg = JSON.parse(e.data);
+                    if (msg.topic === 'crypto_prices_chainlink' && msg.payload) {
+                        const pd = Array.isArray(msg.payload) ? msg.payload[0] : msg.payload;
+                        if (pd.value) handlePriceUpdate(parseFloat(pd.value));
+                    }
+                } catch (err) {}
+            };
+        } catch (e) {}
+    }
+
+    // Watchdog
+    setInterval(() => {
+        if (Date.now() - lastTickTime > 10000 && lastTickTime > 0) {
+            console.log('⚠ Watchdog: Feed frozen, reconnecting...');
+            if (ws) { try { ws.close(); } catch(e){} }
+        }
+    }, 5000);
+
+    function updateConnectionStatus(state) {
+        const dot = document.getElementById('conn-dot');
+        const ping = document.getElementById('conn-ping');
+        const text = document.getElementById('conn-text');
+        const wrapper = document.getElementById('connection-status');
+
+        switch (state) {
+            case 'connected':
+                dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-emerald-500';
+                ping.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-50';
+                text.textContent = 'Live';
+                wrapper.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+                break;
+            case 'reconnecting':
+                dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-amber-500';
+                ping.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-50';
+                text.textContent = 'Reconnecting';
+                wrapper.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20';
+                break;
+            case 'error':
+                dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-red-500';
+                ping.className = 'hidden';
+                text.textContent = 'Error';
+                wrapper.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-red-500/10 text-red-400 border border-red-500/20';
+                break;
+            default:
+                dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-zinc-500';
+                ping.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-500 opacity-50';
+                text.textContent = 'Connecting';
+                wrapper.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-zinc-800 text-zinc-500 border border-zinc-700/50';
+        }
+    }
+
+    // ====================================================================
+    // PRICE UPDATE HANDLER
+    // ====================================================================
+    function handlePriceUpdate(price) {
+        const now = Date.now();
+
+        // Throttle to ~2 updates/sec for performance
+        if (now - lastTickTime < 500) {
+            // Still record for chart but skip UI update
             chartDataPoints.push({ x: now, y: price });
-            if (chartDataPoints.length > 100) chartDataPoints.shift(); // Keep last ~100 ticks
-            
-            chart.data.labels = chartDataPoints.map(d => "");
-            chart.data.datasets[0].data = chartDataPoints.map(d => d.y);
-            
-            // Force Update
-            chart.update();
-
-            // Logic Engine
-            processLogic(price, now);
+            if (chartDataPoints.length > MAX_CHART_POINTS) chartDataPoints.shift();
+            lastPrice = price;
+            return;
         }
 
-        // --- ORACLE LOGIC ---
-        function processLogic(price, time) {
-            const date = new Date(time);
-            const minutes = date.getMinutes();
-            const seconds = date.getSeconds();
-            const remainder = minutes % 5; // 0-4
-            
-            // Window Definition: Starts at :00:05, Ends at :05:00
-            
-            const isStartOfWindow = (remainder === 0 && seconds < 10); // Generous start buffer
-            const isEndOfWindow = (remainder === 4 && seconds >= 58);
+        lastTickTime = now;
+        prevPrice = lastPrice;
+        lastPrice = price;
 
-            // 1. START NEW WINDOW (LOCK CALL)
-            if (isStartOfWindow && !currentPrediction) {
-                const windowId = `W-${Math.floor(time / 300000)}`; // Unique ID for 5m block
-                
-                let momentum = 0.5;
-                if (chartDataPoints.length > 10) {
-                    const start = chartDataPoints[chartDataPoints.length - 10].y;
-                    const end = price;
-                    momentum = end > start ? 0.6 + Math.random()*0.2 : 0.4 - Math.random()*0.2;
+        // Session high/low
+        if (price > sessionHigh || sessionHigh === 0) {
+            sessionHigh = price;
+            document.getElementById('session-high').textContent = '$' + price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        if (price < sessionLow) {
+            sessionLow = price;
+            document.getElementById('session-low').textContent = '$' + price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // 24h reference
+        if (priceHistory24h.open === 0) priceHistory24h.open = price;
+
+        // Price display
+        const el = document.getElementById('live-price');
+        el.textContent = '$' + price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        // Tick flash
+        if (prevPrice > 0) {
+            const diff = price - prevPrice;
+            if (diff > 0) {
+                el.classList.remove('animate-flash-red');
+                void el.offsetWidth;
+                el.classList.add('animate-flash-green');
+                updatePill('+' + diff.toFixed(2), true);
+            } else if (diff < 0) {
+                el.classList.remove('animate-flash-green');
+                void el.offsetWidth;
+                el.classList.add('animate-flash-red');
+                updatePill(diff.toFixed(2), false);
+            }
+            setTimeout(() => el.classList.remove('animate-flash-green', 'animate-flash-red'), 600);
+        }
+
+        // 24h change
+        if (priceHistory24h.open > 0) {
+            const pct = ((price - priceHistory24h.open) / priceHistory24h.open * 100).toFixed(2);
+            const sign = pct >= 0 ? '+' : '';
+            const color = pct >= 0 ? 'text-emerald-400/60' : 'text-red-400/60';
+            document.getElementById('price-24h').className = `text-[10px] font-mono ${color}`;
+            document.getElementById('price-24h').textContent = `Session: ${sign}${pct}%`;
+        }
+
+        // Chart
+        chartDataPoints.push({ x: now, y: price });
+        if (chartDataPoints.length > MAX_CHART_POINTS) chartDataPoints.shift();
+        updateChart();
+
+        // Oracle logic
+        processOracle(price, now);
+    }
+
+    function updatePill(text, isUp) {
+        const pill = document.getElementById('price-change-pill');
+        pill.textContent = text;
+        if (isUp) {
+            pill.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-400 animate-ticker';
+        } else {
+            pill.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-500/10 border border-red-500/20 text-xs font-mono text-red-400 animate-ticker';
+        }
+    }
+
+    // ====================================================================
+    // CHART
+    // ====================================================================
+    function initChart() {
+        const ctx = document.getElementById('priceChart').getContext('2d');
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, 350);
+        gradient.addColorStop(0, 'rgba(245, 158, 11, 0.15)');
+        gradient.addColorStop(0.5, 'rgba(245, 158, 11, 0.05)');
+        gradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
+
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'BTC/USD',
+                    data: [],
+                    borderColor: '#f59e0b',
+                    backgroundColor: gradient,
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 3,
+                    pointHoverBackgroundColor: '#f59e0b',
+                    fill: true,
+                    tension: 0.2,
+                    segment: {
+                        borderColor: ctx2 => {
+                            if (!ctx2.p0 || !ctx2.p1) return '#f59e0b';
+                            return ctx2.p1.parsed.y >= ctx2.p0.parsed.y ? '#22c55e' : '#ef4444';
+                        }
+                    }
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#18181c',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        titleColor: '#a1a1aa',
+                        bodyColor: '#f4f4f5',
+                        titleFont: { family: 'Space Mono', size: 10 },
+                        bodyFont: { family: 'Space Mono', size: 12, weight: 'bold' },
+                        displayColors: false,
+                        padding: 10,
+                        cornerRadius: 8,
+                        callbacks: {
+                            title: (items) => {
+                                const idx = items[0]?.dataIndex;
+                                if (idx !== undefined) {
+                                    const dp = getVisibleData();
+                                    if (dp[idx]) return new Date(dp[idx].x).toLocaleTimeString();
+                                }
+                                return '';
+                            },
+                            label: (item) => '$' + item.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                        }
+                    }
+                },
+                scales: {
+                    x: { display: false },
+                    y: {
+                        position: 'right',
+                        border: { display: false },
+                        grid: { color: 'rgba(255,255,255,0.03)', lineWidth: 1 },
+                        ticks: {
+                            color: '#52525b',
+                            font: { family: 'Space Mono', size: 10 },
+                            maxTicksLimit: 6,
+                            callback: v => '$' + (v/1000).toFixed(1) + 'k'
+                        }
+                    }
+                },
+                animation: false
+            }
+        });
+    }
+
+    function getVisibleData() {
+        const cutoff = Date.now() - chartRange * 1000;
+        return chartDataPoints.filter(d => d.x >= cutoff);
+    }
+
+    function updateChart() {
+        const visible = getVisibleData();
+        chart.data.labels = visible.map(d => '');
+        chart.data.datasets[0].data = visible.map(d => d.y);
+        chart.update('none');
+    }
+
+    function setChartRange(seconds) {
+        chartRange = seconds;
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.toggle('active', parseInt(btn.dataset.range) === seconds);
+        });
+        updateChart();
+    }
+
+    // ====================================================================
+    // ORACLE LOGIC — improved prediction algorithm
+    // ====================================================================
+    function processOracle(price, time) {
+        const date = new Date(time);
+        const minutes = date.getMinutes();
+        const seconds = date.getSeconds();
+        const remainder = minutes % 5;
+
+        // Window start: first 8 seconds of a 5-min block
+        const isStartOfWindow = (remainder === 0 && seconds < 8);
+        // Window end: last 3 seconds of a 5-min block
+        const isEndOfWindow = (remainder === 4 && seconds >= 57);
+
+        // 1. LOCK NEW PREDICTION
+        if (isStartOfWindow && !currentPrediction) {
+            const windowId = `W-${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}-${date.getHours().toString().padStart(2,'0')}${minutes.toString().padStart(2,'0')}`;
+
+            // Momentum calculation using recent ticks
+            const recentPoints = chartDataPoints.slice(-30);
+            let momentum = 0.5;
+            let volatility = 0;
+
+            if (recentPoints.length >= 10) {
+                // EMA-style momentum
+                const prices = recentPoints.map(p => p.y);
+                const shortMA = avg(prices.slice(-5));
+                const longMA = avg(prices.slice(-15));
+                const veryShortMA = avg(prices.slice(-3));
+
+                // Price relative to MAs
+                const maSignal = (veryShortMA - longMA) / longMA * 10000; // in bps
+
+                // Trend strength
+                let trendingUp = 0;
+                for (let i = 1; i < prices.length; i++) {
+                    if (prices[i] > prices[i-1]) trendingUp++;
                 }
+                const trendRatio = trendingUp / (prices.length - 1);
 
-                const dir = momentum > 0.53 ? 'UP' : (momentum < 0.47 ? 'DOWN' : 'NEUTRAL');
-                const conf = Math.floor(50 + Math.abs(momentum - 0.5) * 100);
+                // Volatility (standard deviation of returns)
+                const returns = [];
+                for (let i = 1; i < prices.length; i++) {
+                    returns.push((prices[i] - prices[i-1]) / prices[i-1]);
+                }
+                volatility = Math.sqrt(returns.reduce((a, r) => a + r*r, 0) / returns.length) * 10000;
 
-                currentPrediction = {
-                    id: windowId,
-                    startPrice: price,
-                    dir: dir,
-                    conf: conf,
-                    startTime: time
-                };
-
-                saveLocalState();
-                updatePredictionUI(currentPrediction);
+                // Combined momentum
+                momentum = 0.5 + (maSignal * 0.01) + (trendRatio - 0.5) * 0.3;
+                momentum = Math.max(0.1, Math.min(0.9, momentum));
             }
 
-            // 2. END WINDOW (RESOLVE)
-            if (isEndOfWindow && currentPrediction) {
-                const result = price > currentPrediction.startPrice ? 'UP' : 'DOWN';
-                const win = currentPrediction.dir === 'NEUTRAL' ? 'PUSH' : (currentPrediction.dir === result ? 'WIN' : 'LOSS');
-                
-                saveToSupabase({
-                    id: currentPrediction.id,
-                    window_time: new Date(currentPrediction.startTime).toISOString(),
-                    start_price: currentPrediction.startPrice,
-                    end_price: price,
-                    direction: currentPrediction.dir,
-                    confidence: currentPrediction.conf,
-                    result: win
-                });
+            const dir = momentum > 0.55 ? 'UP' : (momentum < 0.45 ? 'DOWN' : (Math.random() > 0.5 ? 'UP' : 'DOWN'));
+            const conf = Math.min(95, Math.floor(50 + Math.abs(momentum - 0.5) * 100));
 
-                currentPrediction = null; // Reset
-                saveLocalState();
-                
-                // Temp UI Reset
-                document.getElementById('call-status').innerText = "RESOLVING...";
-                setTimeout(() => {
-                    document.getElementById('call-status').innerText = "WAITING";
-                    document.getElementById('prediction-text').innerText = "NEUTRAL";
-                    document.getElementById('prediction-icon').className = "w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center text-3xl text-zinc-600";
-                    document.getElementById('prediction-icon').innerHTML = '<i class="fa-solid fa-minus"></i>';
-                    document.getElementById('strike-price').innerText = "—";
-                }, 4000);
-            }
-        }
-
-        function updatePredictionUI(pred) {
-            const pText = document.getElementById('prediction-text');
-            const pIcon = document.getElementById('prediction-icon');
-            const status = document.getElementById('call-status');
-
-            status.innerText = "LOCKED";
-            status.className = "text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse";
-            
-            pText.innerText = pred.dir;
-            document.getElementById('confidence-text').innerText = `Conf: ${pred.conf}%`;
-            document.getElementById('strike-price').innerText = `$${pred.startPrice.toFixed(2)}`;
-            document.getElementById('momentum-val').innerText = pred.dir === 'UP' ? 'Bullish' : 'Bearish';
-
-            if (pred.dir === 'UP') {
-                pText.className = "text-3xl font-black italic tracking-tighter text-emerald-400";
-                pIcon.className = "w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/20 flex items-center justify-center text-3xl text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)]";
-                pIcon.innerHTML = '<i class="fa-solid fa-arrow-trend-up"></i>';
-            } else if (pred.dir === 'DOWN') {
-                pText.className = "text-3xl font-black italic tracking-tighter text-red-400";
-                pIcon.className = "w-16 h-16 rounded-2xl bg-red-500/20 border border-red-500/20 flex items-center justify-center text-3xl text-red-400 shadow-[0_0_20px_rgba(248,113,113,0.2)]";
-                pIcon.innerHTML = '<i class="fa-solid fa-arrow-trend-down"></i>';
-            }
-        }
-
-        // --- SUPABASE FUNCTIONS ---
-        async function saveToSupabase(data) {
-            if (!supabase) return;
-            const { error } = await supabase.from('btc_5m_calls').insert([data]);
-            if (!error) console.log("Saved to global history");
-        }
-
-        function subscribeToGlobalHistory() {
-            if (!supabase) return;
-            supabase.channel('public:btc_5m_calls')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'btc_5m_calls' }, payload => {
-                    renderRow(payload.new);
-                })
-                .subscribe();
-        }
-
-        async function fetchGlobalHistory() {
-            if (!supabase) return;
-            const { data, error } = await supabase
-                .from('btc_5m_calls')
-                .select('*')
-                .order('window_time', { ascending: false })
-                .limit(20);
-            
-            if (data) {
-                document.getElementById('history-body').innerHTML = '';
-                data.forEach(renderRow);
-            }
-        }
-
-        function renderRow(row) {
-            const container = document.getElementById('history-body');
-            const tr = document.createElement('tr');
-            tr.className = "border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors";
-            
-            const time = new Date(row.window_time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            const dirColor = row.direction === 'UP' ? 'text-emerald-400' : (row.direction === 'DOWN' ? 'text-red-400' : 'text-zinc-400');
-            const resColor = row.result === 'WIN' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 
-                             (row.result === 'LOSS' ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-zinc-400 bg-zinc-800');
-
-            tr.innerHTML = `
-                <td class="px-5 py-4 font-mono text-zinc-400">${time}</td>
-                <td class="px-5 py-4 font-bold ${dirColor}">${row.direction} <span class="text-xs font-normal opacity-50 ml-1">${row.confidence}%</span></td>
-                <td class="px-5 py-4 font-mono text-zinc-300">$${Number(row.start_price).toFixed(2)}</td>
-                <td class="px-5 py-4 text-right">
-                    <span class="px-2 py-1 rounded text-xs font-bold border ${resColor}">${row.result}</span>
-                </td>
-            `;
-            
-            // Insert at top, keep max 20
-            container.insertBefore(tr, container.firstChild);
-            if (container.children.length > 20) container.removeChild(container.lastChild);
-        }
-
-        // --- MANUAL BET SYSTEM ---
-        function renderManualBets() {
-            const container = document.getElementById('manual-log');
-            if (manualBets.length === 0) {
-                container.innerHTML = '<div class="text-center text-zinc-600 text-sm mt-10">Place a manual bet to track performance locally.</div>';
-                return;
-            }
-            container.innerHTML = manualBets.map(bet => `
-                <div class="flex justify-between items-center p-3 rounded-lg bg-zinc-800/50 border border-white/5">
-                    <div class="flex flex-col">
-                        <span class="text-xs text-zinc-500">${bet.time}</span>
-                        <span class="font-bold ${bet.dir==='UP'?'text-emerald-400':'text-red-400'}">${bet.dir} @ $${bet.price}</span>
-                    </div>
-                    <div class="text-xs bg-zinc-900 px-2 py-1 rounded text-zinc-400">PENDING</div>
-                </div>
-            `).join('');
-        }
-
-        function placeManualBet(dir) {
-            if (lastPrice === 0) return;
-            const bet = {
-                time: new Date().toLocaleTimeString(),
+            currentPrediction = {
+                id: windowId,
+                startPrice: price,
                 dir: dir,
-                price: lastPrice.toLocaleString('en-US')
+                conf: conf,
+                startTime: time,
+                momentum: momentum,
+                volatility: volatility.toFixed(1)
             };
-            manualBets.unshift(bet);
-            localStorage.setItem('btc5m_manual_v2', JSON.stringify(manualBets));
-            renderManualBets();
+
+            saveLocalState();
+            updatePredictionUI(currentPrediction);
+            showToast(`🔒 Locked: ${dir} @ $${price.toLocaleString('en-US', {minimumFractionDigits:2})}`, 'lock');
+            playSound('lock');
+
+            document.getElementById('window-label').textContent = 'Active';
+            document.getElementById('window-label').className = 'text-[10px] mt-1.5 px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 font-bold uppercase tracking-wider border border-amber-500/20';
         }
 
-        // --- COUNTDOWN LOGIC ---
-        function startTimer() {
-            setInterval(() => {
-                const now = new Date();
-                const minutes = now.getMinutes();
-                const seconds = now.getSeconds();
-                
-                // Next multiple of 5 minutes
-                const nextFive = Math.ceil((minutes + 1) / 5) * 5; 
-                let diffMin = nextFive - minutes - 1;
-                let diffSec = 59 - seconds;
-                
-                if (diffMin < 0) diffMin += 5; // Adjustment for hour rollover
+        // 2. RESOLVE WINDOW
+        if (isEndOfWindow && currentPrediction) {
+            const actual = price > currentPrediction.startPrice ? 'UP' : 'DOWN';
+            const result = currentPrediction.dir === actual ? 'WIN' : 'LOSS';
 
-                const str = `${diffMin}:${diffSec.toString().padStart(2, '0')}`;
-                document.getElementById('countdown').innerText = str;
-
-                // Window Range Text
-                const startWin = new Date(now);
-                startWin.setMinutes(minutes - (minutes % 5));
-                const endWin = new Date(startWin);
-                endWin.setMinutes(startWin.getMinutes() + 5);
-                
-                document.getElementById('window-range').innerText = 
-                    `${startWin.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} — ${endWin.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
-
-            }, 1000);
-        }
-
-        // --- INIT ---
-        window.onload = () => {
-            initChart();
-            restoreLocalState();
-            connect();
-            startTimer();
-            renderManualBets();
-            
-            // FAKE DATA FOR PREVIEW IF OFFLINE
-            let fakeP = 96500;
-            for(let i=0; i<50; i++) {
-                fakeP += (Math.random()-0.5)*100;
-                chartDataPoints.push({x: Date.now() - (50-i)*1000, y: fakeP});
+            // Update stats
+            if (result === 'WIN') {
+                stats.wins++;
+                stats.streak = stats.streakType === 'W' ? stats.streak + 1 : 1;
+                stats.streakType = 'W';
+            } else {
+                stats.losses++;
+                stats.streak = stats.streakType === 'L' ? stats.streak + 1 : 1;
+                stats.streakType = 'L';
             }
-            chart.data.labels = chartDataPoints.map(() => "");
-            chart.data.datasets[0].data = chartDataPoints.map(d => d.y);
-            chart.update();
+            localStorage.setItem('btc5m_stats', JSON.stringify(stats));
+            updateStatsUI();
+
+            // Save to Supabase
+            saveToSupabase({
+                id: currentPrediction.id,
+                window_time: new Date(currentPrediction.startTime).toISOString(),
+                start_price: currentPrediction.startPrice,
+                end_price: price,
+                direction: currentPrediction.dir,
+                confidence: currentPrediction.conf,
+                result: result
+            });
+
+            // Resolve manual bets for this window
+            resolveManualBets(price);
+
+            // Toast + sound
+            if (result === 'WIN') {
+                showToast(`✅ WIN! Called ${currentPrediction.dir} — Price moved ${actual}`, 'win');
+                playSound('win');
+            } else {
+                showToast(`❌ LOSS — Called ${currentPrediction.dir}, moved ${actual}`, 'loss');
+                playSound('loss');
+            }
+
+            currentPrediction = null;
+            saveLocalState();
+
+            // Reset UI after delay
+            document.getElementById('call-status').textContent = 'Resolving';
+            document.getElementById('call-status').className = 'text-[10px] px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-400 font-bold uppercase tracking-wider border border-amber-500/20';
+
+            setTimeout(() => {
+                resetPredictionUI();
+                document.getElementById('window-label').textContent = 'Waiting';
+                document.getElementById('window-label').className = 'text-[10px] mt-1.5 px-2 py-0.5 rounded bg-surface-3 text-zinc-600 font-bold uppercase tracking-wider';
+            }, 4000);
+        }
+    }
+
+    function avg(arr) { return arr.reduce((a, b) => a + b, 0) / arr.length; }
+
+    // ====================================================================
+    // PREDICTION UI
+    // ====================================================================
+    function updatePredictionUI(pred) {
+        const pText = document.getElementById('prediction-text');
+        const pIcon = document.getElementById('prediction-icon');
+        const status = document.getElementById('call-status');
+        const card = document.getElementById('prediction-card');
+
+        status.textContent = 'Locked';
+        status.className = 'text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 font-bold uppercase tracking-wider border border-emerald-500/20 animate-pulse';
+
+        pText.textContent = pred.dir;
+        document.getElementById('confidence-text').textContent = `Confidence: ${pred.conf}%`;
+        document.getElementById('strike-price').textContent = '$' + pred.startPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('momentum-val').textContent = pred.dir === 'UP' ? '↗ Bullish' : '↘ Bearish';
+        document.getElementById('volatility-val').textContent = (pred.volatility || '--') + ' bps';
+
+        if (pred.dir === 'UP') {
+            pText.className = 'text-3xl font-black italic tracking-tight text-emerald-400 leading-none';
+            pIcon.className = 'w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center text-2xl text-emerald-400 shrink-0';
+            pIcon.innerHTML = '<i class="fa-solid fa-arrow-trend-up"></i>';
+            card.classList.remove('glow-bear');
+            card.classList.add('glow-bull');
+        } else {
+            pText.className = 'text-3xl font-black italic tracking-tight text-red-400 leading-none';
+            pIcon.className = 'w-14 h-14 rounded-2xl bg-red-500/15 border border-red-500/20 flex items-center justify-center text-2xl text-red-400 shrink-0';
+            pIcon.innerHTML = '<i class="fa-solid fa-arrow-trend-down"></i>';
+            card.classList.remove('glow-bull');
+            card.classList.add('glow-bear');
+        }
+    }
+
+    function resetPredictionUI() {
+        document.getElementById('prediction-text').textContent = 'WAIT';
+        document.getElementById('prediction-text').className = 'text-3xl font-black italic tracking-tight text-zinc-600 leading-none';
+        document.getElementById('prediction-icon').className = 'w-14 h-14 rounded-2xl bg-surface-3 flex items-center justify-center text-2xl text-zinc-600 transition-all duration-500 shrink-0';
+        document.getElementById('prediction-icon').innerHTML = '<i class="fa-solid fa-hourglass"></i>';
+        document.getElementById('call-status').textContent = 'Waiting';
+        document.getElementById('call-status').className = 'text-[10px] px-2 py-0.5 rounded-md bg-surface-3 text-zinc-500 font-bold uppercase tracking-wider border border-white/[0.04]';
+        document.getElementById('confidence-text').textContent = 'Confidence: --%';
+        document.getElementById('strike-price').textContent = '—';
+        document.getElementById('momentum-val').textContent = '—';
+        document.getElementById('volatility-val').textContent = '—';
+        document.getElementById('prediction-card').classList.remove('glow-bull', 'glow-bear');
+    }
+
+    // ====================================================================
+    // MANUAL BETS
+    // ====================================================================
+    function placeManualBet(dir) {
+        if (lastPrice === 0) {
+            showToast('⚠ Waiting for price feed...', 'info');
+            return;
+        }
+
+        const now = new Date();
+        const minutes = now.getMinutes();
+        const windowStart = new Date(now);
+        windowStart.setMinutes(minutes - (minutes % 5), 0, 0);
+        const windowEnd = new Date(windowStart);
+        windowEnd.setMinutes(windowStart.getMinutes() + 5);
+
+        const bet = {
+            id: 'M-' + Date.now(),
+            time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            dir: dir,
+            price: lastPrice,
+            windowEnd: windowEnd.getTime(),
+            result: 'PENDING'
         };
+
+        manualBets.unshift(bet);
+        if (manualBets.length > 50) manualBets.pop();
+        localStorage.setItem('btc5m_manual_v3', JSON.stringify(manualBets));
+        renderManualBets();
+        showToast(`📍 ${dir} @ $${lastPrice.toLocaleString('en-US', {minimumFractionDigits:2})}`, dir === 'UP' ? 'win' : 'loss');
+        playSound('lock');
+    }
+
+    function resolveManualBets(endPrice) {
+        let changed = false;
+        manualBets.forEach(bet => {
+            if (bet.result === 'PENDING' && Date.now() >= bet.windowEnd - 5000) {
+                const actual = endPrice > bet.price ? 'UP' : 'DOWN';
+                bet.result = bet.dir === actual ? 'WIN' : 'LOSS';
+                bet.endPrice = endPrice;
+                changed = true;
+            }
+        });
+        if (changed) {
+            localStorage.setItem('btc5m_manual_v3', JSON.stringify(manualBets));
+            renderManualBets();
+        }
+    }
+
+    function renderManualBets() {
+        const container = document.getElementById('manual-log');
+        const wCount = manualBets.filter(b => b.result === 'WIN').length;
+        const lCount = manualBets.filter(b => b.result === 'LOSS').length;
+        document.getElementById('manual-score').textContent = `${wCount}W / ${lCount}L`;
+
+        if (manualBets.length === 0) {
+            container.innerHTML = '<div class="text-center text-zinc-600 text-xs mt-8">Place a call to start tracking.</div>';
+            return;
+        }
+
+        container.innerHTML = manualBets.slice(0, 20).map(bet => {
+            const dirColor = bet.dir === 'UP' ? 'text-emerald-400' : 'text-red-400';
+            const dirIcon = bet.dir === 'UP' ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+            let resultBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-surface-3 text-zinc-500 font-bold">PENDING</span>';
+            if (bet.result === 'WIN') resultBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/20">WIN ✓</span>';
+            else if (bet.result === 'LOSS') resultBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/15 text-red-400 font-bold border border-red-500/20">LOSS ✗</span>';
+
+            return `
+                <div class="flex justify-between items-center p-2.5 rounded-lg bg-surface-2/50 border border-white/[0.04] hover:border-white/[0.08] transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg ${bet.dir === 'UP' ? 'bg-emerald-500/10' : 'bg-red-500/10'} flex items-center justify-center">
+                            <i class="fa-solid ${dirIcon} text-xs ${dirColor}"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-xs ${dirColor}">${bet.dir} <span class="text-zinc-500 font-normal">@ $${Number(bet.price).toLocaleString('en-US', {minimumFractionDigits:2})}</span></div>
+                            <div class="text-[10px] text-zinc-600 font-mono">${bet.time}</div>
+                        </div>
+                    </div>
+                    ${resultBadge}
+                </div>
+            `;
+        }).join('');
+    }
+
+    function clearManualBets() {
+        if (manualBets.length === 0) return;
+        manualBets = [];
+        localStorage.setItem('btc5m_manual_v3', JSON.stringify(manualBets));
+        renderManualBets();
+        showToast('🗑 Manual bets cleared', 'info');
+    }
+
+    // ====================================================================
+    // COUNTDOWN TIMER
+    // ====================================================================
+    function startTimer() {
+        const ringFill = document.getElementById('countdown-ring-fill');
+        const circumference = 2 * Math.PI * 52; // r=52
+
+        setInterval(() => {
+            const now = new Date();
+            const totalSec = now.getMinutes() * 60 + now.getSeconds();
+            const windowSec = totalSec % 300; // seconds into current 5-min window
+            const remaining = 299 - windowSec;
+
+            const mins = Math.floor(remaining / 60);
+            const secs = remaining % 60;
+            document.getElementById('countdown').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+
+            // Ring progress
+            const progress = windowSec / 300;
+            ringFill.setAttribute('stroke-dashoffset', circumference * (1 - progress));
+
+            // Color shift as time runs out
+            if (remaining < 30) {
+                ringFill.style.stroke = '#ef4444';
+                document.getElementById('countdown').className = 'text-3xl font-mono font-bold text-red-400 tabular-nums';
+            } else if (remaining < 60) {
+                ringFill.style.stroke = '#f59e0b';
+                document.getElementById('countdown').className = 'text-3xl font-mono font-bold text-amber-400 tabular-nums';
+            } else {
+                ringFill.style.stroke = '#f59e0b';
+                document.getElementById('countdown').className = 'text-3xl font-mono font-bold text-amber-400 tabular-nums';
+            }
+
+            // Window range text
+            const startMin = now.getMinutes() - (now.getMinutes() % 5);
+            const wStart = new Date(now);
+            wStart.setMinutes(startMin, 0, 0);
+            const wEnd = new Date(wStart);
+            wEnd.setMinutes(wStart.getMinutes() + 5);
+            document.getElementById('window-range').textContent =
+                wStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' → ' +
+                wEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        }, 1000);
+    }
+
+    // ====================================================================
+    // PERSISTENCE
+    // ====================================================================
+    function saveLocalState() {
+        if (currentPrediction) {
+            localStorage.setItem('btc5m_active_pred', JSON.stringify(currentPrediction));
+        } else {
+            localStorage.removeItem('btc5m_active_pred');
+        }
+    }
+
+    function restoreLocalState() {
+        const saved = localStorage.getItem('btc5m_active_pred');
+        if (!saved) return;
+        try {
+            const parsed = JSON.parse(saved);
+            const winEnd = new Date(parsed.startTime);
+            winEnd.setMinutes(winEnd.getMinutes() - (winEnd.getMinutes() % 5) + 5);
+
+            if (Date.now() < winEnd.getTime()) {
+                currentPrediction = parsed;
+                updatePredictionUI(currentPrediction);
+                document.getElementById('window-label').textContent = 'Active';
+                document.getElementById('window-label').className = 'text-[10px] mt-1.5 px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 font-bold uppercase tracking-wider border border-amber-500/20';
+                console.log('✅ Restored active prediction');
+            } else {
+                localStorage.removeItem('btc5m_active_pred');
+            }
+        } catch (e) {
+            console.error('State restore error:', e);
+        }
+    }
+
+    // ====================================================================
+    // STATS
+    // ====================================================================
+    function updateStatsUI() {
+        document.getElementById('stat-wl').textContent = `${stats.wins} / ${stats.losses}`;
+        const total = stats.wins + stats.losses;
+        document.getElementById('stat-rate').textContent = total > 0 ? (stats.wins / total * 100).toFixed(0) + '%' : '--%';
+
+        const streakEl = document.getElementById('stat-streak');
+        if (stats.streak > 0 && stats.streakType) {
+            streakEl.textContent = `${stats.streak}${stats.streakType}`;
+            streakEl.className = stats.streakType === 'W' ? 'text-emerald-400' : 'text-red-400';
+        } else {
+            streakEl.textContent = '0';
+            streakEl.className = 'text-zinc-200';
+        }
+    }
+
+    // ====================================================================
+    // TOASTS
+    // ====================================================================
+    function showToast(msg, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(() => { if (toast.parentNode) toast.remove(); }, 4000);
+    }
+
+    // ====================================================================
+    // SOUND
+    // ====================================================================
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        localStorage.setItem('btc5m_sound', JSON.stringify(soundEnabled));
+        updateSoundIcon();
+    }
+
+    function updateSoundIcon() {
+        const btn = document.getElementById('sound-toggle');
+        btn.innerHTML = soundEnabled
+            ? '<i class="fa-solid fa-volume-high"></i>'
+            : '<i class="fa-solid fa-volume-xmark"></i>';
+        btn.className = `w-8 h-8 rounded-lg bg-surface-2 border border-white/[0.06] flex items-center justify-center transition-colors text-xs ${soundEnabled ? 'text-amber-400' : 'text-zinc-600'}`;
+    }
+
+    function playSound(type) {
+        if (!soundEnabled) return;
+        try {
+            const ac = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ac.createOscillator();
+            const gain = ac.createGain();
+            osc.connect(gain);
+            gain.connect(ac.destination);
+            gain.gain.value = 0.08;
+
+            if (type === 'win') {
+                osc.frequency.setValueAtTime(523, ac.currentTime);
+                osc.frequency.setValueAtTime(659, ac.currentTime + 0.1);
+                osc.frequency.setValueAtTime(784, ac.currentTime + 0.2);
+                gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.5);
+                osc.start(); osc.stop(ac.currentTime + 0.5);
+            } else if (type === 'loss') {
+                osc.frequency.setValueAtTime(400, ac.currentTime);
+                osc.frequency.setValueAtTime(300, ac.currentTime + 0.15);
+                gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.4);
+                osc.start(); osc.stop(ac.currentTime + 0.4);
+            } else {
+                osc.frequency.setValueAtTime(600, ac.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.15);
+                osc.start(); osc.stop(ac.currentTime + 0.15);
+            }
+        } catch (e) {}
+    }
+
+    // ====================================================================
+    // HELPERS
+    // ====================================================================
+    function setEl(id, text, className) {
+        const el = document.getElementById(id);
+        if (el) {
+            if (text !== undefined) el.textContent = text;
+            if (className !== undefined) el.className = className;
+        }
+    }
 
     </script>
 </body>
